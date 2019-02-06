@@ -101,11 +101,7 @@ namespace Checkers
                     using (var brush = new SolidBrush(fieldState == State.Black 
                                              ? Color.FromArgb(129, 112, 94) 
                                              : Color.FromArgb(233, 217, 200)))
-                        graphics.FillRectangle(_hoverCells.Contains(mapCell) ? Brushes.SteelBlue : brush, rect);
-//#if (DEBUG)
-//                    graphics.DrawString(string.Format("{0}", address),
-//                        SystemFonts.DefaultFont, Brushes.Black, rect.Location);
-//#endif
+                        graphics.FillRectangle(_hoverCells.Contains(mapCell) ? Brushes.DarkGray : brush, rect);
                     if (mapCell.State == State.White || mapCell.State == State.Black)
                     {
                         var sizeW = CellSize - (int)(CellSize * 0.91);
@@ -135,8 +131,10 @@ namespace Checkers
                 point.Y = side ? cellsCount - point.Y - 1 : point.Y;
                 var rect = new Rectangle(_topLeftSize.Width + BorderWidth + point.X * CellSize,
                     _topLeftSize.Height + BorderWidth + point.Y * CellSize, CellSize, CellSize);
-                using (var pen = new Pen(Color.Blue, 1))
+                using (var pen = new Pen(Color.Aqua, 1))
+                {
                     graphics.DrawRectangle(pen, rect);
+                }
             }
         }
 
@@ -206,7 +204,7 @@ namespace Checkers
             {
                 // если ячейка не пустая, но не может быть выбрана
                 if (cell.State != State.Blank && !_board.CanCellEnter(cell)) return;
-                // нет выбранной клетки с фишкой
+                // нет выбранной ячейки с фишкой
                 if (_board.Selected == null)
                     // можем выбирать фишки только цвета игрока
                     SetSelectedCell(cell);

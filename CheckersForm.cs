@@ -30,7 +30,7 @@ namespace Checkers
             status.Text = string.Format(_board.Direction 
                 ? "Ход чёрных ({0})..." : "Ход белых ({0})...", 
                 text.ToLower().TrimEnd('!'));
-            //MessageBox.Show(this, text, caption);
+            MessageBox.Show(this, text, caption);
         }
 
         private void _io_CheckerMoved(bool direction, Address startPos, Address endPos, MoveResult moveResult, int stepCount)
@@ -118,8 +118,14 @@ namespace Checkers
 
         private void CheckersForm_MouseDown(object sender, MouseEventArgs e)
         {
-            _io.MouseDown(e.Location, ModifierKeys);
-            Invalidate();
+            var n = lvLog.SelectedIndices.Count > 0 ? lvLog.SelectedIndices[0] : -1;
+            if (n < 0 || n == _log.Count - 1)
+            {
+                _io.MouseDown(e.Location, ModifierKeys);
+                Invalidate();
+            }
+            else
+                _board_ShowError("Выберите последнюю строку партии для продолжения", "Продолжение игры");
         }
 
         private void CheckersForm_MouseMove(object sender, MouseEventArgs e)
@@ -185,19 +191,21 @@ namespace Checkers
             e.Item.SubItems.Add(item.Black);
         }
 
-        private void lvLog_SearchForVirtualItem(object sender, SearchForVirtualItemEventArgs e)
-        {
-            e.Index = _log.Count > 0 ? _log.Count - 1 : -1;
-            
-        }
-
         private void lvLog_SelectedIndexChanged(object sender, EventArgs e)
         {
             var n = lvLog.SelectedIndices.Count > 0 ? lvLog.SelectedIndices[0] : -1;
-            if (n < 0) return;
+            if (n < 0) n = _log.Count - 1;
+            _board.Selected = null;
             var map = _log[n].Map.DeepClone();
             _board.SetMap(map);
             Invalidate();
+            if (n == _log.Count - 1)
+            {
+                lvLog.SelectedIndices.Clear();
+                UpdateStatus();
+            }
+            else
+                status.Text = string.Format("Положение фигур после {0}-го хода.", n + 1);
         }
 
         private void tsmiTunings_Click(object sender, EventArgs e)

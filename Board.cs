@@ -185,7 +185,7 @@ namespace Checkers
             var dX = endPos.Coordinates().X - startPos.Coordinates().X;
             var dY = endPos.Coordinates().Y - startPos.Coordinates().Y;
 
-            var startCellKing = ((Cell)mCells[startPos]).King;
+            var startCellIsKing = ((Cell)mCells[startPos]).King;
             var targetCellState = ((Cell)mCells[endPos]).State;
             if (targetCellState == State.Blank)
             {
@@ -203,7 +203,7 @@ namespace Checkers
                 else // проверка "хода"
                 if (Math.Abs(dX) == 1 && dY == 1 && Direction || Math.Abs(dX) == 1 && dY == -1 && !Direction ||
                     // дамка "ходит" во все стороны
-                    Math.Abs(dX) == 1 && Math.Abs(dY) == 1 && startCellKing)
+                    Math.Abs(dX) == 1 && Math.Abs(dY) == 1 && startCellIsKing)
                     result = MoveResult.SuccessfullMove;
             }
             return result;

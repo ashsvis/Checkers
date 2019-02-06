@@ -100,23 +100,24 @@
             this.tsmiNewGame.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsmiNewGame.Name = "tsmiNewGame";
             this.tsmiNewGame.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
-            this.tsmiNewGame.Size = new System.Drawing.Size(172, 22);
+            this.tsmiNewGame.Size = new System.Drawing.Size(180, 22);
             this.tsmiNewGame.Text = "&Новая";
             this.tsmiNewGame.Click += new System.EventHandler(this.tsmiNewGame_Click);
             // 
             // tsmiOpenGame
             // 
+            this.tsmiOpenGame.Enabled = false;
             this.tsmiOpenGame.Image = ((System.Drawing.Image)(resources.GetObject("tsmiOpenGame.Image")));
             this.tsmiOpenGame.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsmiOpenGame.Name = "tsmiOpenGame";
             this.tsmiOpenGame.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.tsmiOpenGame.Size = new System.Drawing.Size(172, 22);
+            this.tsmiOpenGame.Size = new System.Drawing.Size(180, 22);
             this.tsmiOpenGame.Text = "&Открыть";
             // 
             // toolStripSeparator
             // 
             this.toolStripSeparator.Name = "toolStripSeparator";
-            this.toolStripSeparator.Size = new System.Drawing.Size(169, 6);
+            this.toolStripSeparator.Size = new System.Drawing.Size(177, 6);
             // 
             // tsmiSaveGame
             // 
@@ -125,18 +126,18 @@
             this.tsmiSaveGame.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsmiSaveGame.Name = "tsmiSaveGame";
             this.tsmiSaveGame.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.tsmiSaveGame.Size = new System.Drawing.Size(172, 22);
+            this.tsmiSaveGame.Size = new System.Drawing.Size(180, 22);
             this.tsmiSaveGame.Text = "&Сохранить";
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(169, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
             // 
             // tsmiExit
             // 
             this.tsmiExit.Name = "tsmiExit";
-            this.tsmiExit.Size = new System.Drawing.Size(172, 22);
+            this.tsmiExit.Size = new System.Drawing.Size(180, 22);
             this.tsmiExit.Text = "Вы&ход";
             this.tsmiExit.Click += new System.EventHandler(this.tsmiExit_Click);
             // 
@@ -156,7 +157,7 @@
             this.tsmiWhiteSide,
             this.tsmiBlackSide});
             this.tsmiSelectSide.Name = "tsmiSelectSide";
-            this.tsmiSelectSide.Size = new System.Drawing.Size(162, 22);
+            this.tsmiSelectSide.Size = new System.Drawing.Size(180, 22);
             this.tsmiSelectSide.Text = "Выбор стороны";
             this.tsmiSelectSide.DropDownOpening += new System.EventHandler(this.tsmiSelectSide_DropDownOpening);
             // 
@@ -177,12 +178,13 @@
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(159, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(177, 6);
             // 
             // tsmiTunings
             // 
+            this.tsmiTunings.Enabled = false;
             this.tsmiTunings.Name = "tsmiTunings";
-            this.tsmiTunings.Size = new System.Drawing.Size(162, 22);
+            this.tsmiTunings.Size = new System.Drawing.Size(180, 22);
             this.tsmiTunings.Text = "&Параметры...";
             this.tsmiTunings.Click += new System.EventHandler(this.tsmiTunings_Click);
             // 
@@ -198,19 +200,21 @@
             // 
             // tsmiRules
             // 
+            this.tsmiRules.Enabled = false;
             this.tsmiRules.Name = "tsmiRules";
-            this.tsmiRules.Size = new System.Drawing.Size(162, 22);
+            this.tsmiRules.Size = new System.Drawing.Size(180, 22);
             this.tsmiRules.Text = "&Правила игры...";
             // 
             // toolStripSeparator5
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(159, 6);
+            this.toolStripSeparator5.Size = new System.Drawing.Size(177, 6);
             // 
             // tsmiAbout
             // 
+            this.tsmiAbout.Enabled = false;
             this.tsmiAbout.Name = "tsmiAbout";
-            this.tsmiAbout.Size = new System.Drawing.Size(162, 22);
+            this.tsmiAbout.Size = new System.Drawing.Size(180, 22);
             this.tsmiAbout.Text = "&О программе...";
             // 
             // mainStatus
@@ -256,6 +260,7 @@
             // tsbOpenGame
             // 
             this.tsbOpenGame.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsbOpenGame.Enabled = false;
             this.tsbOpenGame.Image = ((System.Drawing.Image)(resources.GetObject("tsbOpenGame.Image")));
             this.tsbOpenGame.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbOpenGame.Name = "tsbOpenGame";
@@ -274,6 +279,7 @@
             // 
             // panelInfo
             // 
+            this.panelInfo.BackColor = System.Drawing.Color.DarkGray;
             this.panelInfo.Controls.Add(this.lbBlackScore);
             this.panelInfo.Controls.Add(this.lbWhiteScore);
             this.panelInfo.Controls.Add(this.lvLog);
@@ -287,23 +293,26 @@
             // 
             // lbBlackScore
             // 
-            this.lbBlackScore.AutoSize = true;
+            this.lbBlackScore.BackColor = System.Drawing.Color.Black;
             this.lbBlackScore.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.lbBlackScore.Location = new System.Drawing.Point(127, 22);
+            this.lbBlackScore.ForeColor = System.Drawing.Color.White;
+            this.lbBlackScore.Location = new System.Drawing.Point(114, 25);
             this.lbBlackScore.Name = "lbBlackScore";
-            this.lbBlackScore.Size = new System.Drawing.Size(69, 17);
+            this.lbBlackScore.Size = new System.Drawing.Size(89, 25);
             this.lbBlackScore.TabIndex = 2;
             this.lbBlackScore.Text = "Чёрные: 0";
+            this.lbBlackScore.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lbWhiteScore
             // 
-            this.lbWhiteScore.AutoSize = true;
+            this.lbWhiteScore.BackColor = System.Drawing.Color.White;
             this.lbWhiteScore.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.lbWhiteScore.Location = new System.Drawing.Point(36, 22);
+            this.lbWhiteScore.Location = new System.Drawing.Point(24, 25);
             this.lbWhiteScore.Name = "lbWhiteScore";
-            this.lbWhiteScore.Size = new System.Drawing.Size(59, 17);
+            this.lbWhiteScore.Size = new System.Drawing.Size(89, 25);
             this.lbWhiteScore.TabIndex = 2;
             this.lbWhiteScore.Text = "Белые: 0";
+            this.lbWhiteScore.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lvLog
             // 
@@ -329,7 +338,6 @@
             this.lvLog.View = System.Windows.Forms.View.Details;
             this.lvLog.VirtualMode = true;
             this.lvLog.RetrieveVirtualItem += new System.Windows.Forms.RetrieveVirtualItemEventHandler(this.lvLog_RetrieveVirtualItem);
-            this.lvLog.SearchForVirtualItem += new System.Windows.Forms.SearchForVirtualItemEventHandler(this.lvLog_SearchForVirtualItem);
             this.lvLog.SelectedIndexChanged += new System.EventHandler(this.lvLog_SelectedIndexChanged);
             // 
             // chStep
