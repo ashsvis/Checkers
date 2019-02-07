@@ -430,51 +430,68 @@ namespace Checkers
             if (Direction && cell.State == State.White) return false;
             // "ходят" белые и пытаемся выбрать чёрную фишку
             if (!Direction && cell.State == State.Black) return false;
+            // у фишки нет ходов
+            if (!HasGoals(cell)) return false;
             // если по очереди некоторые фишки могут "ударить", но эта фишка "ударить" не может
             if (HasAnyCombat() && !HasCombat(cell.Address)) return false;
             return true;
         }
 
         /// <summary>
+        /// Есть ли у фишки вообще ходы?
+        /// </summary>
+        /// <param name="cell"></param>
+        /// <returns></returns>
+        private bool HasGoals(Cell cell)
+        {
+            var goals = new List<Cell>();
+            FillGoalCells(cell, goals);
+            return goals.Count > 0;
+        }
+
+        /// <summary>
         /// Заполнение списка ячеек, куда возможно перемещение фишки, с учетом правил
         /// </summary>
         /// <param name="selectedCell">Текущая ячейка с фишкой</param>
-        public void FillGoalCells(Cell selectedCell)
+        public void FillGoalCells(Cell selectedCell, List<Cell> goals = null)
         {
+            var goalList = goals ?? _goalCells; 
             var pos = selectedCell.Address;
             var king = selectedCell.King;
             //
-            var listMove = new List<Address>();
-            var listBattle = new List<Address>();
-            // добавляем адреса вокруг фишки для проверки
-            listMove.AddRange(new Address[]{
-                    // "ход"
-                    new Address(pos.Coords.X - 1, pos.Coords.Y - 1),
-                    new Address(pos.Coords.X + 1, pos.Coords.Y - 1),
-                    new Address(pos.Coords.X - 1, pos.Coords.Y + 1),
-                    new Address(pos.Coords.X + 1, pos.Coords.Y + 1),
-                });
-            listBattle.AddRange(new Address[]{
-                    // "бой"
-                    new Address(pos.Coords.X - 2, pos.Coords.Y - 2),
-                    new Address(pos.Coords.X + 2, pos.Coords.Y - 2),
-                    new Address(pos.Coords.X - 2, pos.Coords.Y + 2),
-                    new Address(pos.Coords.X + 2, pos.Coords.Y + 2)
-                });
-            foreach (var addr in listBattle)
+            AddGoal(goalList, pos, -2, -2, king);
+            AddGoal(goalList, pos, +2, -2, king);
+            AddGoal(goalList, pos, -2, +2, king);
+            AddGoal(goalList, pos, +2, +2, king);
+            if (_goalCells.Count > 0) return;
+            AddGoal(goalList, pos, -1, -1, king);
+            AddGoal(goalList, pos, +1, -1, king);
+            AddGoal(goalList, pos, -1, +1, king);
+            AddGoal(goalList, pos, +1, +1, king);
+        }
+
+        /// <summary>
+        /// Добавление целевого поля для шашки
+        /// </summary>
+        /// <param name="goalList">Список целей, накопительный</param>
+        /// <param name="pos">адрес ячейки, вокруг которой ищется цель</param>
+        /// <param name="dx">шаг поиска по горизонтали</param>
+        /// <param name="dy">шаг поиска по вертикали</param>
+        private bool AddGoal(List<Cell> goalList, Address pos, int dx, int dy, bool king)
+        {
+            var result = false;
+            var addr = new Address(pos.Coords.X + dx, pos.Coords.Y + dy);
+            Console.WriteLine(addr + (king ? " king" : ""));
+            var check = CheckMove(pos, addr);
+            if (check != MoveResult.Prohibited)
             {
-                var check = CheckMove(pos, addr);
-                if (check != MoveResult.Prohibited)
-                    _goalCells.Add(((Cell)_cells[addr]));
+                goalList.Add((Cell)_cells[addr]);
+                if (king)
+                    result = result || AddGoal(goalList, addr, dx, dy, king);
+                else
+                    result = true;
             }
-            if (_goalCells.Count > 0)
-                return;
-            foreach (var addr in listMove)
-            {
-                var check = CheckMove(pos, addr);
-                if (check != MoveResult.Prohibited)
-                    _goalCells.Add(((Cell)_cells[addr]));
-            }
+            return result;
         }
     }
 }

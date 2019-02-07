@@ -168,7 +168,7 @@ namespace Checkers
             }
         }
 
-        #region Рисование бордюра вокрцг доски с обозначениями полей
+        #region Рисование бордюра вокруг доски с обозначениями полей
 
         /// <summary>
         /// Рисование букв столбцов по обеим сторонам доски
@@ -235,14 +235,17 @@ namespace Checkers
         /// <param name="modifierKeys"></param>
         public void MouseDown(Point location, MouseButtons buttons, Keys modifierKeys)
         {
-            var address = GetCellAddress(location);
-            _board.SelectCell(address);
-
-           if (buttons == MouseButtons.Left && _board.Selected != null)
+            if (buttons == MouseButtons.Left)
             {
-                _down = true;
-                _moveRect = GetCellRect(location);
-                _downOffset = new Point(location.X - _moveRect.X, location.Y - _moveRect.Y);
+                var address = GetCellAddress(location);
+                _board.SelectCell(address);
+                if (_board.Selected != null)
+                {
+                    _down = true;
+                    _moveRect = GetCellRect(location);
+                    _moveRect.Offset(-2, -2); // "приподнимание" фишки в момент нажатия
+                    _downOffset = new Point(location.X - _moveRect.X, location.Y - _moveRect.Y);
+                }
             }
         }
 
