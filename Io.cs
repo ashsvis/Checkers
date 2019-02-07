@@ -129,7 +129,7 @@ namespace Checkers
                 }
             }
             if (_down)
-                DrawChecker(graphics, _moveRect, _board.Selected);
+                DrawChecker(graphics, _moveRect, _board.Selected, true);
         }
 
         /// <summary>
@@ -138,13 +138,22 @@ namespace Checkers
         /// <param name="graphics">Канва</param>
         /// <param name="rect">Прямоугольник рисования</param>
         /// <param name="mapCell">Ссылка на ячейку с фишкой</param>
-        private static void DrawChecker(Graphics graphics, Rectangle rect, Cell mapCell)
+        /// <param name="shadow">Тень под фишкой</param>
+        private static void DrawChecker(Graphics graphics, Rectangle rect, Cell mapCell, bool shadow = false)
         {
             if (mapCell.State == State.White || mapCell.State == State.Black)
             {
                 var sizeW = CellSize - (int)(CellSize * 0.91);
                 var sizeH = CellSize - (int)(CellSize * 0.91);
                 rect.Inflate(-sizeW, -sizeH);
+                if (shadow)
+                {
+                    const int shadowOffset = 6;
+                    rect.Offset(shadowOffset, shadowOffset);
+                    using (var brush = new SolidBrush(Color.FromArgb(128, Color.Black)))
+                        graphics.FillEllipse(brush, rect);
+                    rect.Offset(-shadowOffset, -shadowOffset);
+                }
                 using (var brush = new SolidBrush(mapCell.State == State.Black
                                      ? Color.FromArgb(10, 10, 10)
                                      : Color.FromArgb(250, 250, 250)))
