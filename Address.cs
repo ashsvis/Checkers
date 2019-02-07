@@ -33,9 +33,9 @@ namespace Checkers
             return Column == '\0' && Row == 0;
         }
 
-        public Point Coordinates()
+        public Point Coords
         {
-            return new Point(chars.IndexOf(Column), 7 - (Row - 1));
+            get { return new Point(chars.IndexOf(Column), 7 - (Row - 1)); }
         }
 
         public override string ToString()

@@ -16,13 +16,21 @@ namespace Checkers
         {
             InitializeComponent();
             mainStatus.SizingGrip = false;
+            
             DoubleBuffered = true;
             _log = new List<LogItem>();
             _board = new Board();
             _board.ShowError += _board_ShowError;
+            _board.AskQuestion += _board_AskQuestion;
+            _board.ActivePlayerChanged += _io_ActivePlayerChanged;
+            _board.CheckerMoved += _io_CheckerMoved;
             _io = new Io(_board, new Size(0, mainMenu.Height + mainTools.Height));
-            _io.ActivePlayerChanged += _io_ActivePlayerChanged;
-            _io.CheckerMoved += _io_CheckerMoved;
+        }
+
+        private bool _board_AskQuestion(string text, string caption)
+        {
+            return MessageBox.Show(this, text, caption, MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes;
         }
 
         private void _board_ShowError(string text, string caption)
@@ -30,7 +38,7 @@ namespace Checkers
             status.Text = string.Format(_board.Direction 
                 ? "Ход чёрных ({0})..." : "Ход белых ({0})...", 
                 text.ToLower().TrimEnd('!'));
-            MessageBox.Show(this, text, caption);
+            MessageBox.Show(this, text, caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         private void _io_CheckerMoved(bool direction, Address startPos, Address endPos, MoveResult moveResult, int stepCount)
@@ -84,7 +92,7 @@ namespace Checkers
         {
             _board.ResetMap();
             var size = _io.GetDrawBoardSize();
-            size.Width += panelInfo.Width;
+            size.Width += panelLog.Width;
             size.Height += mainMenu.Height + mainTools.Height + mainStatus.Height;
             ClientSize = size;
             UpdateStatus();
@@ -118,19 +126,43 @@ namespace Checkers
 
         private void CheckersForm_MouseDown(object sender, MouseEventArgs e)
         {
-            var n = lvLog.SelectedIndices.Count > 0 ? lvLog.SelectedIndices[0] : -1;
-            if (n < 0 || n == _log.Count - 1)
+            if (_board.Mode == PlayMode.Game)
             {
-                _io.MouseDown(e.Location, ModifierKeys);
-                Invalidate();
+                var n = lvLog.SelectedIndices.Count > 0 ? lvLog.SelectedIndices[0] : -1;
+                if (n < 0 || n == _log.Count - 1)
+                {
+                    _io.MouseDown(e.Location, e.Button,  ModifierKeys);
+                    Invalidate();
+                }
+                else
+                    if (_board_AskQuestion("Продолжить игру?", "Шашки"))
+                {
+                    var item = lvLog.Items[_log.Count - 1];
+                    item.Selected = true;
+                }
             }
-            else
-                _board_ShowError("Выберите последнюю строку партии для продолжения", "Продолжение игры");
+            else if (_board.Mode == PlayMode.Collocation)
+            {
+
+            }
         }
 
         private void CheckersForm_MouseMove(object sender, MouseEventArgs e)
         {
-            _io.MouseMove(e.Location, ModifierKeys);
+            if (_board.Mode == PlayMode.Game)
+            {
+                _io.MouseMove(e.Location, e.Button, ModifierKeys);
+                Invalidate();
+            }
+            else if (_board.Mode == PlayMode.Collocation)
+            {
+
+            }
+        }
+
+        private void CheckersForm_MouseUp(object sender, MouseEventArgs e)
+        {
+            _io.MouseUp(e.Location, e.Button, ModifierKeys);
             Invalidate();
         }
 
@@ -211,6 +243,30 @@ namespace Checkers
         private void tsmiTunings_Click(object sender, EventArgs e)
         {
             //
+        }
+
+        private void tsmiApplicationMode_DropDownOpening(object sender, EventArgs e)
+        {
+            tsmiGameMode.Checked = _board.Mode == PlayMode.Game;
+            tsmiCollocationMode.Checked = _board.Mode == PlayMode.Collocation;
+        }
+
+        private void tsmiGameMode_Click(object sender, EventArgs e)
+        {
+            tsmiSelectSide.Enabled = true;
+            _board.Mode = PlayMode.Game; // игра
+            panelLog.Visible = true;
+            UpdateStatus();
+            Invalidate();
+        }
+
+        private void tsmiCollocationMode_Click(object sender, EventArgs e)
+        {
+            tsmiSelectSide.Enabled = false;
+            _board.Mode = PlayMode.Collocation; // расстановка
+            panelLog.Visible = false;
+            status.Text = "Режим расстановки шашек";
+            Invalidate();
         }
     }
 }
