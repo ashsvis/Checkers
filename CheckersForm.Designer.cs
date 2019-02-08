@@ -65,6 +65,8 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.panelLog = new System.Windows.Forms.Panel();
+            this.saveGameDialog = new System.Windows.Forms.SaveFileDialog();
+            this.openGameDialog = new System.Windows.Forms.OpenFileDialog();
             this.mainMenu.SuspendLayout();
             this.mainStatus.SuspendLayout();
             this.mainTools.SuspendLayout();
@@ -103,24 +105,24 @@
             this.tsmiNewGame.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsmiNewGame.Name = "tsmiNewGame";
             this.tsmiNewGame.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
-            this.tsmiNewGame.Size = new System.Drawing.Size(172, 22);
+            this.tsmiNewGame.Size = new System.Drawing.Size(180, 22);
             this.tsmiNewGame.Text = "&Новая";
             this.tsmiNewGame.Click += new System.EventHandler(this.tsmiNewGame_Click);
             // 
             // tsmiOpenGame
             // 
-            this.tsmiOpenGame.Enabled = false;
             this.tsmiOpenGame.Image = ((System.Drawing.Image)(resources.GetObject("tsmiOpenGame.Image")));
             this.tsmiOpenGame.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsmiOpenGame.Name = "tsmiOpenGame";
             this.tsmiOpenGame.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.tsmiOpenGame.Size = new System.Drawing.Size(172, 22);
+            this.tsmiOpenGame.Size = new System.Drawing.Size(180, 22);
             this.tsmiOpenGame.Text = "&Открыть";
+            this.tsmiOpenGame.Click += new System.EventHandler(this.tsmiOpenGame_Click);
             // 
             // toolStripSeparator
             // 
             this.toolStripSeparator.Name = "toolStripSeparator";
-            this.toolStripSeparator.Size = new System.Drawing.Size(169, 6);
+            this.toolStripSeparator.Size = new System.Drawing.Size(177, 6);
             // 
             // tsmiSaveGame
             // 
@@ -129,18 +131,19 @@
             this.tsmiSaveGame.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsmiSaveGame.Name = "tsmiSaveGame";
             this.tsmiSaveGame.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.tsmiSaveGame.Size = new System.Drawing.Size(172, 22);
+            this.tsmiSaveGame.Size = new System.Drawing.Size(180, 22);
             this.tsmiSaveGame.Text = "&Сохранить";
+            this.tsmiSaveGame.Click += new System.EventHandler(this.tsmiSaveGame_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(169, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
             // 
             // tsmiExit
             // 
             this.tsmiExit.Name = "tsmiExit";
-            this.tsmiExit.Size = new System.Drawing.Size(172, 22);
+            this.tsmiExit.Size = new System.Drawing.Size(180, 22);
             this.tsmiExit.Text = "Вы&ход";
             this.tsmiExit.Click += new System.EventHandler(this.tsmiExit_Click);
             // 
@@ -288,12 +291,12 @@
             // tsbOpenGame
             // 
             this.tsbOpenGame.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbOpenGame.Enabled = false;
             this.tsbOpenGame.Image = ((System.Drawing.Image)(resources.GetObject("tsbOpenGame.Image")));
             this.tsbOpenGame.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbOpenGame.Name = "tsbOpenGame";
             this.tsbOpenGame.Size = new System.Drawing.Size(23, 22);
             this.tsbOpenGame.Text = "&Открыть";
+            this.tsbOpenGame.Click += new System.EventHandler(this.tsmiOpenGame_Click);
             // 
             // tsbSaveGame
             // 
@@ -304,6 +307,7 @@
             this.tsbSaveGame.Name = "tsbSaveGame";
             this.tsbSaveGame.Size = new System.Drawing.Size(23, 22);
             this.tsbSaveGame.Text = "&Сохранить";
+            this.tsbSaveGame.Click += new System.EventHandler(this.tsmiSaveGame_Click);
             // 
             // lbBlackScore
             // 
@@ -401,6 +405,18 @@
             this.panelLog.Size = new System.Drawing.Size(237, 317);
             this.panelLog.TabIndex = 5;
             // 
+            // saveGameDialog
+            // 
+            this.saveGameDialog.DefaultExt = "che";
+            this.saveGameDialog.Filter = "*.che|*.che";
+            this.saveGameDialog.Title = "Сохранить игру";
+            // 
+            // openGameDialog
+            // 
+            this.openGameDialog.DefaultExt = "che";
+            this.openGameDialog.Filter = "*.che|*.che";
+            this.openGameDialog.Title = "Загрузить игру";
+            // 
             // CheckersForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -418,7 +434,7 @@
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Шашки";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.CheckersForm_FormClosed);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.CheckersForm_FormClosing);
             this.Load += new System.EventHandler(this.CheckersForm_Load);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.CheckersForm_Paint);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.CheckersForm_MouseDown);
@@ -475,6 +491,8 @@
         private System.Windows.Forms.ToolStripMenuItem tsmiGameMode;
         private System.Windows.Forms.ToolStripMenuItem tsmiCollocationMode;
         private System.Windows.Forms.Panel panelLog;
+        private System.Windows.Forms.SaveFileDialog saveGameDialog;
+        private System.Windows.Forms.OpenFileDialog openGameDialog;
     }
 }
 

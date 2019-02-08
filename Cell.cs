@@ -3,12 +3,12 @@
 namespace Checkers
 {
     /// <summary>
-    /// Prohibited, Blank, White, Black
+    /// Empty, Black, White, Prohibited
     /// </summary>
     public enum State
     {
         Prohibited = 3,
-        Blank = 0,
+        Empty = 0,
         White = 2,
         Black = 1
     }
@@ -25,7 +25,7 @@ namespace Checkers
         public Address Address { get; set; }
 
         /// <summary>
-        /// Назначение ячейки: Prohibited, Blank, White, Black
+        /// Состояние ячейки: Empty, Black, White, Prohibited
         /// </summary>
         public State State { get; set; }
 

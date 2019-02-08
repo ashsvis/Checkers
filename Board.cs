@@ -14,16 +14,22 @@ namespace Checkers
         SuccessfullCombat           // разрешённое взятие шашки противника
     }
 
-    public enum Player
-    {
-        White,
-        Black
-    }
-
     public enum PlayMode
     {
         Game,       // игра
         Collocation // расстановка фишек
+    }
+
+    public enum GoalDirection
+    {
+        NW,
+        N,
+        NE,
+        E,
+        SE,
+        S,
+        SW,
+        W
     }
 
     [Serializable]
@@ -39,6 +45,21 @@ namespace Checkers
 
         private int _movedCount = 0;
         List<Cell> _goalCells = new List<Cell>();
+        Game _game;
+
+        public Board(Game game)
+        {
+            _game = game;
+        }
+
+        public void SetGame(Game game)
+        {
+            _game = game;
+            var n = _game.Log.Count - 1;
+            if (n < 0) return;
+            var map = _game.Log[n].Map.DeepClone();
+            SetMap(map);
+        }
 
         public int SideSize { get { return _boardSize; } }
 
@@ -51,28 +72,20 @@ namespace Checkers
                 {
                     // сохраняем текущую расстановку
                     if (_mode == PlayMode.Game)
-                    {
                         _lastGameMap = _cells.DeepClone();
-                        Console.WriteLine("Сохранили игру");
-                    }
                     else if (_mode == PlayMode.Collocation)
-                    {
                         _lastCollocationMap = _cells.DeepClone();
-                        Console.WriteLine("Сохранили расстановку");
-                    }
                     _mode = value;
                     // восстанавливаем расстановка
                     if (_mode == PlayMode.Game && _lastGameMap != null)
                     {
                         var map = _lastGameMap.DeepClone();
                         SetMap(map);
-                        Console.WriteLine("Восстановили игру");
                     }
                     else if (_mode == PlayMode.Collocation && _lastCollocationMap != null)
                     {
                         var map = _lastCollocationMap.DeepClone();
                         SetMap(map);
-                        Console.WriteLine("Восстановили расстановку");
                     }
                 }
             }
@@ -83,7 +96,7 @@ namespace Checkers
             var whiteCheckers = Mode == PlayMode.Game ? "a1,c1,e1,g1,b2,d2,f2,h2,a3,c3,e3,g3" : "";
             var blackCheckers = Mode == PlayMode.Game ? "b6,d6,f6,h6,a7,c7,e7,g7,b8,d8,f8,h8" : "";
             _cells.Clear();
-            Direction = false;
+            _game.Direction = false;
             Selected = null;
             var black = false;  // признак чередования цветов полей
             for (var i = 0; i < _boardSize; i++)
@@ -97,7 +110,7 @@ namespace Checkers
                     else if (blackCheckers.Contains(address.ToString()))
                         state = State.Black;
                     else
-                        state = black ? State.Blank : State.Prohibited;
+                        state = black ? State.Empty : State.Prohibited;
                     var cell = new Cell() { Address = address, State = state };
                     _cells[address] = cell;
                     _fields[address] = black ? State.Black : State.White;
@@ -106,9 +119,6 @@ namespace Checkers
                 black = !black;     // чередуем цвет в строке
             }
         }
-
-        public int WhiteScore { get; set; }
-        public int BlackScore { get; set; }
 
         public Hashtable GetMap()
         {
@@ -125,8 +135,6 @@ namespace Checkers
             return _fields;
         }
 
-        public bool Direction { get; set; }
-
         public Cell Selected
         {
             get { return _selected; }
@@ -138,8 +146,6 @@ namespace Checkers
                     FillGoalCells(_selected);
             }
         }
-
-        public Player Player { get; set; }
 
         /// <summary>
         /// При текущем направлении игры проверяем, если у стороны "бьющие" фишки
@@ -153,9 +159,9 @@ namespace Checkers
                 var cell = (Cell)((DictionaryEntry)item).Value;
                 var cellState = cell.State;
                 var cellAddress = cell.Address;
-                if (cellState == State.Blank || cellState == State.Prohibited) continue;
-                if ((Direction && cellState == State.Black ||
-                    !Direction && cellState == State.White) && HasCombat(cellAddress))
+                if (cellState == State.Empty || cellState == State.Prohibited) continue;
+                if ((_game.Direction && cellState == State.Black ||
+                    !_game.Direction && cellState == State.White) && HasCombat(cellAddress))
                     return true;
             }
             return result;
@@ -172,8 +178,8 @@ namespace Checkers
             if (pos.IsEmpty() || pos.IsEmpty()) return result;
             var cellState = ((Cell)_cells[pos]).State;
             // запрет хода для фишек не в свою очередь
-            if (Direction && cellState != State.Black ||
-                !Direction && cellState != State.White) return result;
+            if (_game.Direction && cellState != State.Black ||
+                !_game.Direction && cellState != State.White) return result;
             var list = new List<Address>
             {
                 // "бой"
@@ -195,22 +201,24 @@ namespace Checkers
         /// <param name="endPos">Конечная позиция</param>
         /// <param name="direction">Направление проверки: false - фишки идут вверх, true - фишки идут вниз</param>
         /// <returns>Результат хода</returns>
-        public MoveResult CheckMove(Address startPos, Address endPos)
+        public MoveResult CheckMove(Address startPos, Address endPos, bool? king = null)
         {
             var result = MoveResult.Prohibited;
             if (startPos.IsEmpty() || endPos.IsEmpty()) return result;
 
             var startCellState = ((Cell)_cells[startPos]).State;
-            // запрет хода для фишек не в свою очередь
-            if (Direction && startCellState != State.Black ||
-                !Direction && startCellState != State.White) return result;
-            
+            if (startCellState != State.Empty)
+            {
+                // запрет хода для фишек не в свою очередь
+                if (_game.Direction && startCellState != State.Black ||
+                    !_game.Direction && startCellState != State.White) return result;
+            }
             var dX = endPos.Coords.X - startPos.Coords.X;
             var dY = endPos.Coords.Y - startPos.Coords.Y;
 
-            var startCellIsKing = ((Cell)_cells[startPos]).King;
+            var startCellIsKing = king != null ? (bool)king : ((Cell)_cells[startPos]).King;
             var targetCellState = ((Cell)_cells[endPos]).State;
-            if (targetCellState == State.Blank)
+            if (targetCellState == State.Empty)
             {
                 // проверка "боя"
                 if (Math.Abs(dX) == 2 && Math.Abs(dY) == 2)
@@ -224,7 +232,7 @@ namespace Checkers
                                 ? MoveResult.SuccessfullCombat : result;
                 }
                 else // проверка "хода"
-                if (Math.Abs(dX) == 1 && dY == 1 && Direction || Math.Abs(dX) == 1 && dY == -1 && !Direction ||
+                if (Math.Abs(dX) == 1 && dY == 1 && _game.Direction || Math.Abs(dX) == 1 && dY == -1 && !_game.Direction ||
                     // дамка "ходит" во все стороны
                     Math.Abs(dX) == 1 && Math.Abs(dY) == 1 && startCellIsKing)
                     result = MoveResult.SuccessfullMove;
@@ -294,7 +302,7 @@ namespace Checkers
         private void RemoveChecker(Address pos)
         {
             var cell = (Cell)_cells[pos];
-            cell.State = State.Blank;
+            cell.State = State.Empty;
             cell.King = false;
         }
 
@@ -344,14 +352,14 @@ namespace Checkers
             if (GetCell(location, out cell) && cell.State != State.Prohibited)
             {
                 // если ячейка не пустая, но не может быть выбрана
-                if (cell.State != State.Blank && !CanCellEnter(cell)) return;
+                if (cell.State != State.Empty && !CanCellEnter(cell)) return;
                 // нет выбранной ячейки с фишкой
                 if (Selected == null)
                     // можем выбирать фишки только цвета игрока
                     SetSelectedCell(cell);
                 else
                 // ранее была выбрана фишка и выбрана пустая клетка
-                if (cell.State == State.Blank)
+                if (cell.State == State.Empty)
                 // пробуем делать ход
                 {
                     var startPos = Selected.Address;
@@ -363,21 +371,20 @@ namespace Checkers
                         // подсчёт очков
                         if (moveResult == MoveResult.SuccessfullCombat)
                         {
-                            if (Direction)
-                                BlackScore++;
+                            if (_game.Direction)
+                                _game.BlackScore++;
                             else
-                                WhiteScore++;
+                                _game.WhiteScore++;
                         }
-
+                        // считаем количество непрерывных ходов одной стороной
                         _movedCount++;
                         // определение дамки
                         if (!cell.King &&
-                            (!Direction && cell.Address.Row == SideSize ||
-                             Direction && cell.Address.Row == 1))
-                            cell.King = true;
+                            (!_game.Direction && cell.Address.Row == SideSize ||
+                             _game.Direction && cell.Address.Row == 1)) cell.King = true;
                         var hasCombat = HasCombat(endPos); // есть ли в этой позиции возможность боя
                         // запоминаем очередь хода перед возможной сменой
-                        var lastDirection = Direction;
+                        var lastDirection = _game.Direction;
                         // или был бой и далее нет возможности боя
                         if (moveResult == MoveResult.SuccessfullCombat && !hasCombat ||
                             moveResult == MoveResult.SuccessfullMove)
@@ -387,7 +394,7 @@ namespace Checkers
                             // сбрасываем количество непрерывных ходов одной стороной
                             _movedCount = 0;
                             // передача очерёдности хода
-                            Direction = !Direction;
+                            _game.Direction = !_game.Direction;
                             OnActivePlayerChanged();
                             return;
                         }
@@ -425,11 +432,11 @@ namespace Checkers
         public bool CanCellEnter(Cell cell)
         {
             // пустую ячейку сделать текущей не можем
-            if (cell.State == State.Blank) return false;
+            if (cell.State == State.Empty) return false;
             // "ходят" чёрные и пытаемся выбрать белую фишку
-            if (Direction && cell.State == State.White) return false;
+            if (_game.Direction && cell.State == State.White) return false;
             // "ходят" белые и пытаемся выбрать чёрную фишку
-            if (!Direction && cell.State == State.Black) return false;
+            if (!_game.Direction && cell.State == State.Black) return false;
             // у фишки нет ходов
             if (!HasGoals(cell)) return false;
             // если по очереди некоторые фишки могут "ударить", но эта фишка "ударить" не может
@@ -458,16 +465,67 @@ namespace Checkers
             var goalList = goals ?? _goalCells; 
             var pos = selectedCell.Address;
             var king = selectedCell.King;
-            //
-            AddGoal(goalList, pos, -2, -2, king);
-            AddGoal(goalList, pos, +2, -2, king);
-            AddGoal(goalList, pos, -2, +2, king);
-            AddGoal(goalList, pos, +2, +2, king);
-            if (_goalCells.Count > 0) return;
-            AddGoal(goalList, pos, -1, -1, king);
-            AddGoal(goalList, pos, +1, -1, king);
-            AddGoal(goalList, pos, -1, +1, king);
-            AddGoal(goalList, pos, +1, +1, king);
+            if (selectedCell.King) // дамка
+            {
+                var partGoals = new List<Cell>();
+                if (AddKingGoal(partGoals, pos, GoalDirection.NW))
+                    goalList.AddRange(partGoals);
+                partGoals.Clear();
+                if (AddKingGoal(partGoals, pos, GoalDirection.NE))
+                    goalList.AddRange(partGoals);
+                partGoals.Clear();
+                if (AddKingGoal(partGoals, pos, GoalDirection.SE))
+                    goalList.AddRange(partGoals);
+                partGoals.Clear();
+                if (AddKingGoal(partGoals, pos, GoalDirection.SW))
+                    goalList.AddRange(partGoals);
+            }
+            else // обычная шашка
+            {
+                AddGoal(goalList, pos, -2, -2);
+                AddGoal(goalList, pos, +2, -2);
+                AddGoal(goalList, pos, -2, +2);
+                AddGoal(goalList, pos, +2, +2);
+                if (_goalCells.Count > 0) return;
+                AddGoal(goalList, pos, -1, -1);
+                AddGoal(goalList, pos, +1, -1);
+                AddGoal(goalList, pos, -1, +1);
+                AddGoal(goalList, pos, +1, +1);
+            }
+        }
+
+        private bool AddKingGoal(List<Cell> goalList, Address pos, GoalDirection direction)
+        {
+            var result = false;
+            int dx, dy;
+            switch (direction)
+            {
+                case GoalDirection.NW: dx = dy = -1; break;
+                case GoalDirection.NE: dx = +1; dy = -1; break;
+                case GoalDirection.SE: dx = dy = +1; break;
+                case GoalDirection.SW: dx = -1; dy = +1; break;
+                default: return false;
+            }
+            var addr = new Address(pos.Coords.X + dx, pos.Coords.Y + dy);
+            var check = CheckMove(pos, addr, true);
+            if (check == MoveResult.SuccessfullMove)
+            {
+                goalList.Add((Cell)_cells[addr]);
+                result |= AddKingGoal(goalList, addr, direction);
+            }
+            else
+            {
+                addr = new Address(pos.Coords.X + dx * 2, pos.Coords.Y + dy * 2);
+                check = CheckMove(pos, addr, true);
+                if (check == MoveResult.SuccessfullCombat)
+                {
+                    goalList.Clear();
+                    goalList.Add((Cell)_cells[addr]);
+                    AddKingGoal(goalList, addr, direction);
+                    result = true;
+                }
+            }
+            return result;
         }
 
         /// <summary>
@@ -477,21 +535,12 @@ namespace Checkers
         /// <param name="pos">адрес ячейки, вокруг которой ищется цель</param>
         /// <param name="dx">шаг поиска по горизонтали</param>
         /// <param name="dy">шаг поиска по вертикали</param>
-        private bool AddGoal(List<Cell> goalList, Address pos, int dx, int dy, bool king)
+        private void AddGoal(List<Cell> goalList, Address pos, int dx, int dy)
         {
-            var result = false;
             var addr = new Address(pos.Coords.X + dx, pos.Coords.Y + dy);
-            Console.WriteLine(addr + (king ? " king" : ""));
             var check = CheckMove(pos, addr);
             if (check != MoveResult.Prohibited)
-            {
                 goalList.Add((Cell)_cells[addr]);
-                if (king)
-                    result = result || AddGoal(goalList, addr, dx, dy, king);
-                else
-                    result = true;
-            }
-            return result;
         }
     }
 }

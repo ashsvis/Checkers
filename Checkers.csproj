@@ -53,11 +53,13 @@
     <Compile Include="CheckersForm.Designer.cs">
       <DependentUpon>CheckersForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Game.cs" />
     <Compile Include="Io.cs" />
     <Compile Include="LogItem.cs" />
     <Compile Include="ObjectCloner.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SaverLoader.cs" />
     <EmbeddedResource Include="CheckersForm.resx">
       <DependentUpon>CheckersForm.cs</DependentUpon>
     </EmbeddedResource>

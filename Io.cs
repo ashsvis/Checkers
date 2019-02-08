@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
-using System.Windows.Forms;
 
 namespace Checkers
 {
@@ -9,14 +8,21 @@ namespace Checkers
         const int CellSize = 50;    // размер стороны клетки в пикселах
         const int BorderWidth = 20; // ширина бордюра в пикселах
         Board _board;
+        Game _game;
         Size _topLeftSize;
         List<Cell> _hoverCells;
 
-        public Io(Board board, Size topLeftSize)
+        public Io(Game game, Board board, Size topLeftSize)
         {
+            _game = game;
             _board = board;
             _topLeftSize = topLeftSize;
             _hoverCells = new List<Cell>();
+        }
+
+        public void SetGame(Game game)
+        {
+            _game = game;
         }
 
         /// <summary>
@@ -36,7 +42,7 @@ namespace Checkers
         /// <returns>Возвращается адрес клетки</returns>
         public Address GetCellAddress(Point mouse)
         {
-            var side = _board.Player == Player.Black; // переворот доски
+            var side = _game.Player == Player.Black; // переворот доски
             var boardSize = _board.SideSize;
             for (var i = 0; i < boardSize; i++)
             {
@@ -60,7 +66,7 @@ namespace Checkers
         /// <returns></returns>
         public Rectangle GetCellRect(Point mouse)
         {
-            var side = _board.Player == Player.Black; // переворот доски
+            var side = _game.Player == Player.Black; // переворот доски
             var boardSize = _board.SideSize;
             for (var i = 0; i < boardSize; i++)
             {
@@ -95,7 +101,7 @@ namespace Checkers
         /// <param name="graphics">Канва для рисования</param>
         public void DrawBoard(Graphics graphics)
         {
-            var side = _board.Player == Player.Black; // переворот доски
+            var side = _game.Player == Player.Black; // переворот доски
             var fields = _board.GetFields();
             var map = _board.GetMap();
             var cellsCount = _board.SideSize;
@@ -233,19 +239,16 @@ namespace Checkers
         /// </summary>
         /// <param name="location"></param>
         /// <param name="modifierKeys"></param>
-        public void MouseDown(Point location, MouseButtons buttons, Keys modifierKeys)
+        public void MouseDown(Point location)
         {
-            if (buttons == MouseButtons.Left)
+            var address = GetCellAddress(location);
+            _board.SelectCell(address);
+            if (_board.Selected != null)
             {
-                var address = GetCellAddress(location);
-                _board.SelectCell(address);
-                if (_board.Selected != null)
-                {
-                    _down = true;
-                    _moveRect = GetCellRect(location);
-                    _moveRect.Offset(-2, -2); // "приподнимание" фишки в момент нажатия
-                    _downOffset = new Point(location.X - _moveRect.X, location.Y - _moveRect.Y);
-                }
+                _down = true;
+                _moveRect = GetCellRect(location);
+                _moveRect.Offset(-2, -2); // "приподнимание" фишки в момент нажатия
+                _downOffset = new Point(location.X - _moveRect.X, location.Y - _moveRect.Y);
             }
         }
 
@@ -255,8 +258,7 @@ namespace Checkers
         /// Перемещение указателя мыши
         /// </summary>
         /// <param name="location">Позиция курсора</param>
-        /// <param name="modifierKeys">Модификаторные клавиши</param>
-        public void MouseMove(Point location, MouseButtons buttons, Keys modifierKeys)
+        public void MouseMove(Point location)
         {
             var address = GetCellAddress(location);
             Cell cell;
@@ -286,7 +288,7 @@ namespace Checkers
             }
         }
 
-        public void MouseUp(Point location, MouseButtons buttons, Keys modifierKeys)
+        public void MouseUp(Point location)
         {
             if (_down)
             {
