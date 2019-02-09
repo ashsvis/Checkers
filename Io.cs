@@ -241,8 +241,8 @@ namespace Checkers
         /// <param name="modifierKeys"></param>
         public void MouseDown(Point location)
         {
-            var address = GetCellAddress(location);
-            _board.SelectCell(address);
+            var sourceAddress = GetCellAddress(location);
+            _board.SelectSourceCell(sourceAddress);
             if (_board.Selected != null)
             {
                 _down = true;
@@ -292,12 +292,12 @@ namespace Checkers
         {
             if (_down)
             {
-                var address = GetCellAddress(location);
+                var targetAddress = GetCellAddress(location);
                 Cell cell;
                 // если под курсором найдена разрешённая ячейка
                 if (GetCell(location, out cell) && cell != _board.Selected && cell.State != State.Prohibited)
                 {
-                    _board.SelectCell(address);
+                    _board.SelectTargetCell(targetAddress);
                 }
                 else
                     _board.Selected = null;

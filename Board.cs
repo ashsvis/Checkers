@@ -44,7 +44,8 @@ namespace Checkers
         private object _lastCollocationMap = null;
 
         private int _movedCount = 0;
-        List<Cell> _goalCells = new List<Cell>();
+        List<Cell> _steps = new List<Cell>();
+        List<Cell> _battles = new List<Cell>();
         Game _game;
 
         public Board(Game game)
@@ -140,7 +141,8 @@ namespace Checkers
             get { return _selected; }
             set
             {
-                _goalCells.Clear();
+                _steps.Clear();
+                _battles.Clear();
                 _selected = value;
                 if (_selected != null)
                     FillGoalCells(_selected);
@@ -231,11 +233,13 @@ namespace Checkers
                     result = targetCellState != victimCellState && startCellState != victimCellState
                                 ? MoveResult.SuccessfullCombat : result;
                 }
-                else // проверка "хода"
-                if (Math.Abs(dX) == 1 && dY == 1 && _game.Direction || Math.Abs(dX) == 1 && dY == -1 && !_game.Direction ||
-                    // дамка "ходит" во все стороны
-                    Math.Abs(dX) == 1 && Math.Abs(dY) == 1 && startCellIsKing)
-                    result = MoveResult.SuccessfullMove;
+                else
+                // проверка "хода"
+                if (Math.Abs(dX) == 1 && dY == 1 && _game.Direction || 
+                        Math.Abs(dX) == 1 && dY == -1 && !_game.Direction ||
+                        // дамка "ходит" во все стороны
+                        Math.Abs(dX) == 1 && Math.Abs(dY) == 1 && startCellIsKing)
+                        result = MoveResult.SuccessfullMove;
             }
             return result;
         }
@@ -248,23 +252,37 @@ namespace Checkers
         /// <returns>результат хода</returns>
         public MoveResult MakeMove(Address startPos, Address endPos)
         {
-            var moveResult = CheckMove(startPos, endPos);
+            var moveResult = _steps.Contains((Cell)_cells[endPos]) ? MoveResult.SuccessfullMove : MoveResult.Prohibited;
             if (moveResult == MoveResult.SuccessfullMove)
             {
                 if (!HasCombat(startPos))
                     MoveChecker(startPos, endPos);
                 else
+                {
+                    OnShowError("Обязан рубить фишку противника", "Правило");
                     return MoveResult.Prohibited; // обязан брать шашку противника
+                }
             }
-            else if (moveResult == MoveResult.SuccessfullCombat)
+            else
             {
-                MoveChecker(startPos, endPos);
-                // снятие фишки противника
-                var address = new Address((startPos.Coords.X + endPos.Coords.X) / 2,
-                                          (startPos.Coords.Y + endPos.Coords.Y) / 2);
-                RemoveChecker(address);
+                moveResult = _battles.Contains((Cell)_cells[endPos]) ? MoveResult.SuccessfullCombat : MoveResult.Prohibited;
+                if (moveResult == MoveResult.SuccessfullCombat)
+                {
+                    MoveChecker(startPos, endPos);
+                    // снятие фишки противника
+                    var address = new Address((startPos.Coords.X + endPos.Coords.X) / 2,
+                                              (startPos.Coords.Y + endPos.Coords.Y) / 2);
+                    RemoveChecker(address);
+                }
             }
             return moveResult;
+        }
+
+        public event Action UpdateStatus = delegate { };
+
+        private void OnUpdateStatus()
+        {
+            UpdateStatus();
         }
 
         public event Action<string, string> ShowError = delegate { };
@@ -322,7 +340,10 @@ namespace Checkers
 
         public List<Cell> GetGoals()
         {
-            return _goalCells;
+            var list = new List<Cell>();
+            list.AddRange(_steps);
+            list.AddRange(_battles);
+            return list;
         }
 
         public event Action<bool, Address, Address, MoveResult, int> CheckerMoved = delegate { };
@@ -346,20 +367,36 @@ namespace Checkers
             ActivePlayerChanged();
         }
 
-        public void SelectCell(Address location)
+        /// <summary>
+        /// Выбираем фишку для начала хода
+        /// </summary>
+        /// <param name="location"></param>
+        public void SelectSourceCell(Address location)
         {
             Cell cell;
             if (GetCell(location, out cell) && cell.State != State.Prohibited)
             {
                 // если ячейка не пустая, но не может быть выбрана
-                if (cell.State != State.Empty && !CanCellEnter(cell)) return;
-                // нет выбранной ячейки с фишкой
+                if (cell.State != State.Empty && !CanCellEnter(cell))
+                    return;
+                // не должно быть выбранной ячейки с фишкой
                 if (Selected == null)
                     // можем выбирать фишки только цвета игрока
                     SetSelectedCell(cell);
-                else
-                // ранее была выбрана фишка и выбрана пустая клетка
-                if (cell.State == State.Empty)
+            }
+            else // было выбрано неигровое поле
+            {
+                Selected = null;
+                OnShowError("Было выбрано неигровое поле", "Ошибка");
+            }
+        }
+
+        public void SelectTargetCell(Address location)
+        {
+            Cell cell;
+            if (GetCell(location, out cell) && cell.State != State.Prohibited)
+            {
+                if (Selected != null && cell.State == State.Empty) // ранее была выбрана фишка и выбрана пустая клетка
                 // пробуем делать ход
                 {
                     var startPos = Selected.Address;
@@ -404,12 +441,20 @@ namespace Checkers
                         // сообщаем о перемещении фишки
                         OnCheckerMoved(lastDirection, startPos, endPos, moveResult, _movedCount);
                     }
+                    else
+                        OnShowError("Сюда нельзя сделать ход", "Ошибка");
                 }
                 else // была выбрана другая фишка того же цвета
+                {
+                    OnShowError("Была выбрана другая фишка того же цвета", "Ошибка");
                     SetSelectedCell(cell);
+                }
             }
             else // было выбрано неигровое поле
+            {
+                OnShowError("Было выбрано неигровое поле", "Ошибка");
                 Selected = null;
+            }
         }
 
         /// <summary>
@@ -432,15 +477,29 @@ namespace Checkers
         public bool CanCellEnter(Cell cell)
         {
             // пустую ячейку сделать текущей не можем
-            if (cell.State == State.Empty) return false;
+            if (cell.State == State.Empty)
+            {
+                OnUpdateStatus();
+                return false;
+            }
             // "ходят" чёрные и пытаемся выбрать белую фишку
-            if (_game.Direction && cell.State == State.White) return false;
             // "ходят" белые и пытаемся выбрать чёрную фишку
-            if (!_game.Direction && cell.State == State.Black) return false;
+            if (_game.Direction && cell.State == State.White ||
+                !_game.Direction && cell.State == State.Black)
+            {
+                OnShowError("У этой фишки нет очереди для хода", "Ошибка");
+                return false;
+            }
             // у фишки нет ходов
-            if (!HasGoals(cell)) return false;
+            if (!HasGoals(cell))
+            {
+                OnShowError("У этой фишки нет ходов", "Ошибка");
+                return false;
+            }
             // если по очереди некоторые фишки могут "ударить", но эта фишка "ударить" не может
-            if (HasAnyCombat() && !HasCombat(cell.Address)) return false;
+            if (HasAnyCombat() && !HasCombat(cell.Address))
+                return false;
+            OnUpdateStatus();
             return true;
         }
 
@@ -451,49 +510,41 @@ namespace Checkers
         /// <returns></returns>
         private bool HasGoals(Cell cell)
         {
-            var goals = new List<Cell>();
-            FillGoalCells(cell, goals);
-            return goals.Count > 0;
+            _steps.Clear();
+            _battles.Clear();
+            FillGoalCells(cell);
+            var result = _steps.Count > 0 || _battles.Count > 0;
+            _steps.Clear();
+            _battles.Clear();
+            return result;
         }
-
-        private bool _firstBattlePathFound; 
 
         /// <summary>
         /// Заполнение списка ячеек, куда возможно перемещение фишки, с учетом правил
         /// </summary>
         /// <param name="selectedCell">Текущая ячейка с фишкой</param>
-        public void FillGoalCells(Cell selectedCell, List<Cell> goals = null)
+        public void FillGoalCells(Cell selectedCell)
         {
-            var goalList = goals ?? _goalCells; 
             var pos = selectedCell.Address;
             var king = selectedCell.King;
             if (selectedCell.King) // дамка
             {
-                _firstBattlePathFound = false;
-                var partGoals = new List<Cell>();
-                if (AddKingGoal(partGoals, pos, GoalDirection.NW))
-                    goalList.AddRange(partGoals);
-                partGoals.Clear();
-                if (AddKingGoal(partGoals, pos, GoalDirection.NE))
-                    goalList.AddRange(partGoals);
-                partGoals.Clear();
-                if (AddKingGoal(partGoals, pos, GoalDirection.SE))
-                    goalList.AddRange(partGoals);
-                partGoals.Clear();
-                if (AddKingGoal(partGoals, pos, GoalDirection.SW))
-                    goalList.AddRange(partGoals);
+                AddKingGoal(_steps, _battles, pos, GoalDirection.NW);
+                AddKingGoal(_steps, _battles, pos, GoalDirection.NE);
+                AddKingGoal(_steps, _battles, pos, GoalDirection.SE);
+                AddKingGoal(_steps, _battles, pos, GoalDirection.SW);
             }
             else // обычная шашка
             {
-                AddGoal(goalList, pos, -2, -2);
-                AddGoal(goalList, pos, +2, -2);
-                AddGoal(goalList, pos, -2, +2);
-                AddGoal(goalList, pos, +2, +2);
-                if (_goalCells.Count > 0) return;
-                AddGoal(goalList, pos, -1, -1);
-                AddGoal(goalList, pos, +1, -1);
-                AddGoal(goalList, pos, -1, +1);
-                AddGoal(goalList, pos, +1, +1);
+                AddGoal(_battles, pos, -2, -2);
+                AddGoal(_battles, pos, +2, -2);
+                AddGoal(_battles, pos, -2, +2);
+                AddGoal(_battles, pos, +2, +2);
+                if (_steps.Count > 0) return;
+                AddGoal(_steps, pos, -1, -1);
+                AddGoal(_steps, pos, +1, -1);
+                AddGoal(_steps, pos, -1, +1);
+                AddGoal(_steps, pos, +1, +1);
             }
         }
 
@@ -504,9 +555,8 @@ namespace Checkers
         /// <param name="pos">Адрес ячейки, вокруг которой ищется цель</param>
         /// <param name="direction">Направление поиска в "глубину"</param>
         /// <returns>true - была также найдена возможность боя</returns>
-        private bool AddKingGoal(List<Cell> goalList, Address pos, GoalDirection direction)
+        private void AddKingGoal(List<Cell> steps, List<Cell> battles, Address pos, GoalDirection direction)
         {
-            var result = false;
             int dx, dy;
             switch (direction)
             {
@@ -514,14 +564,14 @@ namespace Checkers
                 case GoalDirection.NE: dx = +1; dy = -1; break;
                 case GoalDirection.SE: dx = dy = +1; break;
                 case GoalDirection.SW: dx = -1; dy = +1; break;
-                default: return false;
+                default: return;
             }
             var addr = new Address(pos.Coords.X + dx, pos.Coords.Y + dy);
             var check = CheckMove(pos, addr, true);
             if (check == MoveResult.SuccessfullMove)
             {
-                goalList.Add((Cell)_cells[addr]);
-                result |= AddKingGoal(goalList, addr, direction);
+                steps.Add((Cell)_cells[addr]);
+                AddKingGoal(steps, battles, addr, direction);
             }
             else
             {
@@ -529,19 +579,10 @@ namespace Checkers
                 check = CheckMove(pos, addr, true);
                 if (check == MoveResult.SuccessfullCombat)
                 {
-                    if (!_firstBattlePathFound)
-                    {
-                        _firstBattlePathFound = true;
-                        goalList.Clear();
-                        goalList.Add((Cell)_cells[addr]);
-                        AddKingGoal(goalList, addr, direction);
-                        result = true;
-                    }
-                    else
-                        return true;
+                    battles.Add((Cell)_cells[addr]);
+                    AddKingGoal(steps, battles, addr, direction);
                 }
             }
-            return result;
         }
 
         /// <summary>

@@ -20,6 +20,7 @@ namespace Checkers
 
             _game = new Game();
             _board = new Board(_game);
+            _board.UpdateStatus += () => UpdateStatus();
             _board.ShowError += _board_ShowError;
             _board.AskQuestion += _board_AskQuestion;
             _board.ActivePlayerChanged += _io_ActivePlayerChanged;
@@ -38,7 +39,7 @@ namespace Checkers
             status.Text = string.Format(_game.Direction 
                 ? "Ход чёрных ({0})..." : "Ход белых ({0})...", 
                 text.ToLower().TrimEnd('!'));
-            MessageBox.Show(this, text, caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //MessageBox.Show(this, text, caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         private void _io_CheckerMoved(bool direction, Address startPos, Address endPos, MoveResult moveResult, int stepCount)
