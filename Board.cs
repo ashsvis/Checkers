@@ -456,6 +456,8 @@ namespace Checkers
             return goals.Count > 0;
         }
 
+        private bool _firstBattlePathFound; 
+
         /// <summary>
         /// Заполнение списка ячеек, куда возможно перемещение фишки, с учетом правил
         /// </summary>
@@ -467,6 +469,7 @@ namespace Checkers
             var king = selectedCell.King;
             if (selectedCell.King) // дамка
             {
+                _firstBattlePathFound = false;
                 var partGoals = new List<Cell>();
                 if (AddKingGoal(partGoals, pos, GoalDirection.NW))
                     goalList.AddRange(partGoals);
@@ -494,6 +497,13 @@ namespace Checkers
             }
         }
 
+        /// <summary>
+        /// Добавление целевого поля для дамки
+        /// </summary>
+        /// <param name="goalList">Список целей, накопительный</param>
+        /// <param name="pos">Адрес ячейки, вокруг которой ищется цель</param>
+        /// <param name="direction">Направление поиска в "глубину"</param>
+        /// <returns>true - была также найдена возможность боя</returns>
         private bool AddKingGoal(List<Cell> goalList, Address pos, GoalDirection direction)
         {
             var result = false;
@@ -519,10 +529,16 @@ namespace Checkers
                 check = CheckMove(pos, addr, true);
                 if (check == MoveResult.SuccessfullCombat)
                 {
-                    goalList.Clear();
-                    goalList.Add((Cell)_cells[addr]);
-                    AddKingGoal(goalList, addr, direction);
-                    result = true;
+                    if (!_firstBattlePathFound)
+                    {
+                        _firstBattlePathFound = true;
+                        goalList.Clear();
+                        goalList.Add((Cell)_cells[addr]);
+                        AddKingGoal(goalList, addr, direction);
+                        result = true;
+                    }
+                    else
+                        return true;
                 }
             }
             return result;
@@ -532,9 +548,9 @@ namespace Checkers
         /// Добавление целевого поля для шашки
         /// </summary>
         /// <param name="goalList">Список целей, накопительный</param>
-        /// <param name="pos">адрес ячейки, вокруг которой ищется цель</param>
-        /// <param name="dx">шаг поиска по горизонтали</param>
-        /// <param name="dy">шаг поиска по вертикали</param>
+        /// <param name="pos">Адрес ячейки, вокруг которой ищется цель</param>
+        /// <param name="dx">Шаг поиска по горизонтали</param>
+        /// <param name="dy">Шаг поиска по вертикали</param>
         private void AddGoal(List<Cell> goalList, Address pos, int dx, int dy)
         {
             var addr = new Address(pos.Coords.X + dx, pos.Coords.Y + dy);
