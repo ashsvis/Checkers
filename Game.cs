@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace Checkers
@@ -8,6 +7,14 @@ namespace Checkers
     {
         White,
         Black
+    }
+
+    public enum WinPlayer
+    {
+        None,
+        White,
+        Black,
+        Draw
     }
 
     [Serializable]
@@ -22,9 +29,18 @@ namespace Checkers
 
         public Player Player { get; set; }
 
+        public WinPlayer WinPlayer { get; set; }
+
         public Game()
         {
             Log = new List<LogItem>();
+        }
+
+        public void CheckWin()
+        {
+            WinPlayer = WhiteScore == 12
+                ? WinPlayer.White
+                : BlackScore == 12 ? WinPlayer.Black : WinPlayer.None;
         }
     }
 }

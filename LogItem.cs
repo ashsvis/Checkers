@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Checkers
 {
     [Serializable]
     public class LogItem
     {
+        private List<object> _semiSteps;
+
         /// <summary>
         /// Номер по порядку
         /// </summary>
@@ -23,7 +26,25 @@ namespace Checkers
         /// <summary>
         /// 
         /// </summary>
-        public object Map { get; set; }
+        public object GetLastMap()
+        {
+            return _semiSteps.Count > 0 ? _semiSteps[_semiSteps.Count - 1] : null;
+        }
+
+        public IEnumerable<object> GetMapSemiSteps()
+        {
+            return _semiSteps;
+        }
+
+        public void AddToMap(object value)
+        {
+            _semiSteps.Add(value);
+        }
+
+        public LogItem()
+        {
+            _semiSteps = new List<object>();
+        }
 
         /// <summary>
         /// Текстовое представления

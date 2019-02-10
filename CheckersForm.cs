@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Checkers
@@ -57,18 +58,20 @@ namespace Checkers
                 // ходят "белые"
                 if (stepCount == 1) // первый ход (из, возможно, серии ходов)
                 {
-                    _game.Log.Add(new LogItem() { Number = _game.Log.Count + 1, White = result, Map = _board.GetMap().DeepClone() });
+                    var item = new LogItem() { Number = _game.Log.Count + 1, White = result };
+                    item.AddToMap(_board.GetMap().DeepClone());
+                    _game.Log.Add(item);
                     lvLog.VirtualListSize = _game.Log.Count;
-                    var item = lvLog.Items[lvLog.Items.Count - 1];
-                    lvLog.FocusedItem = item;
-                    item.EnsureVisible();
+                    var lvi = lvLog.Items[lvLog.Items.Count - 1];
+                    lvLog.FocusedItem = lvi;
+                    lvi.EnsureVisible();
                     lvLog.Invalidate();
                 }
                 else
                 {
                     var value = _game.Log[_game.Log.Count - 1];
                     value.White += ":" + endPos;
-                    value.Map = _board.GetMap().DeepClone();
+                    value.AddToMap(_board.GetMap().DeepClone());
                     lvLog.Invalidate();
                 }
             }
@@ -80,7 +83,7 @@ namespace Checkers
                     value.Black = result;
                 else
                     value.Black += ":" + endPos;
-                value.Map = _board.GetMap().DeepClone();
+                value.AddToMap(_board.GetMap().DeepClone());
                 lvLog.Invalidate();
             }
         }
@@ -105,11 +108,13 @@ namespace Checkers
         {
             lbWhiteScore.Text = string.Format("Белые: {0}", _game.WhiteScore);
             lbBlackScore.Text = string.Format("Чёрные: {0}", _game.BlackScore);
-            status.Text = _game.WhiteScore == 12 
+            status.Text = _game.WinPlayer == WinPlayer.White
                 ? "Белые выиграли" 
-                : _game.BlackScore == 12 
+                : _game.WinPlayer == WinPlayer.Black 
                        ? "Чёрные выиграли" 
-                       : _game.Direction ? "Ход чёрных..." : "Ход белых...";
+                       : _game.WinPlayer == WinPlayer.Draw 
+                                ? "Ничья" 
+                                : _game.Direction ? "Ход чёрных..." : "Ход белых...";
         }
 
         private void CheckersForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -128,41 +133,27 @@ namespace Checkers
 
         private void CheckersForm_MouseDown(object sender, MouseEventArgs e)
         {
-            if (_board.Mode == PlayMode.Game)
+            if (e.Button == MouseButtons.Left)
             {
-                if (e.Button == MouseButtons.Left)
+                var n = lvLog.SelectedIndices.Count > 0 ? lvLog.SelectedIndices[0] : -1;
+                if (n < 0 || n == _game.Log.Count - 1)
                 {
-                    var n = lvLog.SelectedIndices.Count > 0 ? lvLog.SelectedIndices[0] : -1;
-                    if (n < 0 || n == _game.Log.Count - 1)
-                    {
-                        _io.MouseDown(e.Location);
-                        Invalidate();
-                    }
-                    else
-                        if (_board_AskQuestion("Продолжить игру?", "Шашки"))
-                    {
-                        var item = lvLog.Items[_game.Log.Count - 1];
-                        item.Selected = true;
-                    }
+                    _io.MouseDown(e.Location);
+                    Invalidate();
                 }
-            }
-            else if (_board.Mode == PlayMode.Collocation)
-            {
-
+                else
+                    if (_board_AskQuestion("Продолжить игру?", "Шашки"))
+                {
+                    var item = lvLog.Items[_game.Log.Count - 1];
+                    item.Selected = true;
+                }
             }
         }
 
         private void CheckersForm_MouseMove(object sender, MouseEventArgs e)
         {
-            if (_board.Mode == PlayMode.Game)
-            {
-                _io.MouseMove(e.Location);
-                Invalidate();
-            }
-            else if (_board.Mode == PlayMode.Collocation)
-            {
-
-            }
+            _io.MouseMove(e.Location);
+            Invalidate();
         }
 
         private void CheckersForm_MouseUp(object sender, MouseEventArgs e)
@@ -230,12 +221,23 @@ namespace Checkers
 
         private void lvLog_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var n = lvLog.SelectedIndices.Count > 0 ? lvLog.SelectedIndices[0] : -1;
-            if (n < 0) n = _game.Log.Count - 1;
+            if (lvLog.SelectedIndices.Count == 0) return;
+            var n = lvLog.SelectedIndices[0];
             _board.Selected = null;
-            var map = _game.Log[n].Map.DeepClone();
-            _board.SetMap(map);
-            Invalidate();
+
+            //var map = _game.Log[n].GetLastMap().DeepClone();
+            //_board.SetMap(map);
+            //Invalidate();
+
+            var semiSteps = _game.Log[n].GetMapSemiSteps();
+            foreach (var item in semiSteps)
+            {
+                var map = item.DeepClone();
+                _board.SetMap(map);
+                Refresh();
+                Thread.Sleep(200);
+            }
+
             if (n == _game.Log.Count - 1)
             {
                 lvLog.SelectedIndices.Clear();

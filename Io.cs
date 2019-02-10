@@ -105,7 +105,6 @@ namespace Checkers
             var fields = _board.GetFields();
             var map = _board.GetMap();
             var cellsCount = _board.SideSize;
-            var goalCells = _board.GetGoals();
             var boardSize = GetDrawBoardSize();
             var boardRect = new Rectangle(new Point(_topLeftSize.Width, _topLeftSize.Height), boardSize);
             using (var brush = new SolidBrush(Color.FromArgb(234, 206, 175)))
@@ -129,7 +128,8 @@ namespace Checkers
                                              : Color.FromArgb(233, 217, 200)))
                         graphics.FillRectangle(_hoverCells.Contains(mapCell) && !_down
                                                     ? Brushes.DarkGray
-                                                    : goalCells.Contains(mapCell) ? Brushes.DarkSlateGray : brush, rect);
+                                                    : _board.GetSteps().Contains(mapCell) ? Brushes.DarkGray
+                                                              : _board.GetBattles().Contains(mapCell) ? Brushes.DarkGray : brush, rect);
                     if (mapCell != _board.Selected || !_down)
                         DrawChecker(graphics, rect, mapCell);
                 }
@@ -147,6 +147,7 @@ namespace Checkers
         /// <param name="shadow">Тень под фишкой</param>
         private static void DrawChecker(Graphics graphics, Rectangle rect, Cell mapCell, bool shadow = false)
         {
+            if (mapCell == null) return;
             if (mapCell.State == State.White || mapCell.State == State.Black)
             {
                 var sizeW = CellSize - (int)(CellSize * 0.91);
