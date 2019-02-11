@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Threading;
 using System.Windows.Forms;
+using Checkers.Net;
 
 namespace Checkers
 {
@@ -11,6 +12,7 @@ namespace Checkers
         private Io _io;
         private Board _board;
         private Game _game;
+        private NetGame _net;
 
         public CheckersForm()
         {
@@ -18,7 +20,10 @@ namespace Checkers
             mainStatus.SizingGrip = false;
             
             DoubleBuffered = true;
-
+            _net = new NetGame();
+            _net.ResolveProgressChanged += _net_ResolveProgressChanged;
+            _net.ResolveCompleted += _net_ResolveCompleted;
+            _net.DisplayPeerMessage += _net_DisplayPeerMessage;
             _game = new Game();
             _board = new Board(_game);
             _board.UpdateStatus += () => UpdateStatus();
@@ -27,6 +32,36 @@ namespace Checkers
             _board.ActivePlayerChanged += _io_ActivePlayerChanged;
             _board.CheckerMoved += _io_CheckerMoved;
             _io = new Io(_game, _board, new Size(0, mainMenu.Height + mainTools.Height));
+        }
+
+        private void _net_DisplayPeerMessage(string message, string from)
+        {
+            // Показать полученное сообщение (вызывается из службы WCF)
+            //MessageBox.Show(this, message, string.Format("Сообщение от {0}", from),
+            //    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            status.Text = message;
+        }
+
+        private void _net_ResolveCompleted()
+        {
+            UpdatePeerList();
+            // Повторно включаем кнопку "обновить"
+            btnRefreshPeers.Enabled = _net.CanRefreshPeers;
+        }
+
+        private void _net_ResolveProgressChanged()
+        {
+            UpdatePeerList();
+        }
+
+        private void UpdatePeerList()
+        {
+            lbPeerList.Items.Clear();
+            foreach (var item in _net.PeerList)
+            {
+                if (item.ButtonsEnabled)
+                    lbPeerList.Items.Add(item);
+            }
         }
 
         private bool _board_AskQuestion(string text, string caption)
@@ -95,6 +130,10 @@ namespace Checkers
 
         private void CheckersForm_Load(object sender, EventArgs e)
         {
+            btnRefreshPeers.Enabled = _net.Start(Properties.Settings.Default.P2PPort, 
+                       Properties.Settings.Default.P2PUserName,
+                       Environment.MachineName);
+            // Конфигурирование игры
             _board.ResetMap();
             var size = _io.GetDrawBoardSize();
             size.Width += panelLog.Width;
@@ -317,6 +356,27 @@ namespace Checkers
                 {
                     SaveGame();
                 }
+            }
+            _net.Stop();
+        }
+
+        private void btnRefreshPeers_Click(object sender, EventArgs e)
+        {
+            if (_net.Started)
+            {
+                lbPeerList.Items.Clear();
+                _net.RefreshPeers();
+                btnRefreshPeers.Enabled = false;
+            }
+        }
+
+        private void lbPeerList_DoubleClick(object sender, EventArgs e)
+        {
+            if (lbPeerList.SelectedIndex >= 0)
+            {
+                // Получение пира и прокси, для отправки сообщения
+                var peerEntry = lbPeerList.SelectedItem as PeerEntry;
+                if (_net.Started) _net.SendMessasge(peerEntry);
             }
         }
     }
