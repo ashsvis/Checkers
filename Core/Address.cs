@@ -28,6 +28,23 @@ namespace Checkers
             }
         }
 
+        public Address(string addr)
+        {
+            int row;
+            if (!string.IsNullOrWhiteSpace(addr) && addr.Length == 2 && 
+                chars.IndexOf(addr[0]) >= 0 && int.TryParse(addr[1].ToString(), out row) &&
+                row > 0 && row <= 8)
+            {
+                Column = addr[0];
+                Row = row;
+            }
+            else
+            {
+                Column = '\0';
+                Row = 0;
+            }
+        }
+
         public bool IsEmpty()
         {
             return Column == '\0' && Row == 0;

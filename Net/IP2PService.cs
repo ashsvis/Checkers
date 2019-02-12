@@ -9,6 +9,6 @@ namespace Checkers.Net
         string GetName();
 
         [OperationContract(IsOneWay = true)]
-        void SendMessage(string message, string from);
+        void SendMessage(P2PData message, string from);
     }
 }

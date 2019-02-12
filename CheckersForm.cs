@@ -21,48 +21,41 @@ namespace Checkers
             
             DoubleBuffered = true;
             _net = new NetGame();
-            _net.ResolveProgressChanged += _net_ResolveProgressChanged;
-            _net.ResolveCompleted += _net_ResolveCompleted;
+            //_net.ResolveProgressChanged += _net_ResolveProgressChanged;
+            //_net.ResolveCompleted += _net_ResolveCompleted;
             _net.DisplayPeerMessage += _net_DisplayPeerMessage;
             _game = new Game();
             _board = new Board(_game);
             _board.UpdateStatus += () => UpdateStatus();
             _board.ShowError += _board_ShowError;
             _board.AskQuestion += _board_AskQuestion;
-            _board.ActivePlayerChanged += _io_ActivePlayerChanged;
-            _board.CheckerMoved += _io_CheckerMoved;
+            _board.ActivePlayerChanged += _board_ActivePlayerChanged;
+            _board.CheckerMoved += _board_CheckerMoved;
             _io = new Io(_game, _board, new Size(0, mainMenu.Height + mainTools.Height));
         }
 
-        private void _net_DisplayPeerMessage(string message, string from)
-        {
-            // Показать полученное сообщение (вызывается из службы WCF)
-            //MessageBox.Show(this, message, string.Format("Сообщение от {0}", from),
-            //    MessageBoxButtons.OK, MessageBoxIcon.Information);
-            status.Text = message;
-        }
+        //private void _net_ResolveCompleted()
+        //{
+        //    UpdatePeerList();
+        //    // Повторно включаем кнопку "обновить"
+        //    btnRefreshPeers.Enabled = _net.CanRefreshPeers;
+        //}
 
-        private void _net_ResolveCompleted()
-        {
-            UpdatePeerList();
-            // Повторно включаем кнопку "обновить"
-            btnRefreshPeers.Enabled = _net.CanRefreshPeers;
-        }
+        //private void _net_ResolveProgressChanged()
+        //{
+        //    UpdatePeerList();
+        //}
 
-        private void _net_ResolveProgressChanged()
-        {
-            UpdatePeerList();
-        }
-
-        private void UpdatePeerList()
-        {
-            lbPeerList.Items.Clear();
-            foreach (var item in _net.PeerList)
-            {
-                if (item.ButtonsEnabled)
-                    lbPeerList.Items.Add(item);
-            }
-        }
+        //private void UpdatePeerList()
+        //{
+        //    lbPeerList.Items.Clear();
+        //    foreach (var item in _net.PeerList)
+        //    {
+        //        if (item.State != PeerState.Unknown)
+        //            lbPeerList.Items.Add(item);
+        //    }
+        //    lbPeerList.Invalidate();
+        //}
 
         private bool _board_AskQuestion(string text, string caption)
         {
@@ -72,13 +65,12 @@ namespace Checkers
 
         private void _board_ShowError(string text, string caption)
         {
-            status.Text = string.Format(_game.Direction 
-                ? "Ход чёрных ({0})..." : "Ход белых ({0})...", 
-                text.ToLower().TrimEnd('!'));
+            UpdateStatusText(string.Format(_game.Direction 
+                ? "Ход чёрных ({0})..." : "Ход белых ({0})...", text.ToLower().TrimEnd('!')));
             //MessageBox.Show(this, text, caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
-        private void _io_CheckerMoved(bool direction, Address startPos, Address endPos, MoveResult moveResult, int stepCount)
+        private void _board_CheckerMoved(bool direction, Address startPos, Address endPos, MoveResult moveResult, int stepCount)
         {
             UpdateLog(direction, startPos, endPos, moveResult, stepCount);
             tsmiSaveGame.Enabled = tsbSaveGame.Enabled = true;
@@ -104,35 +96,74 @@ namespace Checkers
                 }
                 else
                 {
-                    var value = _game.Log[_game.Log.Count - 1];
-                    value.White += ":" + endPos;
-                    value.AddToMap(_board.GetMap().DeepClone());
+                    var item = _game.Log[_game.Log.Count - 1];
+                    item.White += ":" + endPos;
+                    item.AddToMap(_board.GetMap().DeepClone());
                     lvLog.Invalidate();
                 }
             }
             else
             {
                 // ходят "чёрные"
-                var value = _game.Log[_game.Log.Count - 1];
+                var item = _game.Log[_game.Log.Count - 1];
                 if (stepCount == 1) // первый ход (из, возможно, серии ходов)
-                    value.Black = result;
+                    item.Black = result;
                 else
-                    value.Black += ":" + endPos;
-                value.AddToMap(_board.GetMap().DeepClone());
+                    item.Black += ":" + endPos;
+                item.AddToMap(_board.GetMap().DeepClone());
                 lvLog.Invalidate();
             }
         }
 
-        private void _io_ActivePlayerChanged()
+        private void _board_ActivePlayerChanged()
         {
             UpdateStatus();
+            SendNetGameStatus();
+        }
+
+        private void SendNetGameStatus()
+        {
+            if (_net.Started && _net.Enemy != null)
+            {
+                var item = _game.Log[_game.Log.Count - 1];
+                var step = string.Format("{0}", _game.Direction ? item.White : item.Black);
+                _net.SendMessasge(_net.Enemy, new P2PData(_game.Direction ? Player.Black : Player.White, 
+                    step, _game.BlackScore, _game.WhiteScore) { Map = _board.ToString() });
+            }
+        }
+
+        private void _net_DisplayPeerMessage(P2PData message, string from)
+        {
+            // Показать полученное сообщение (вызывается из службы WCF)
+            _board.SetMap(message.Map);
+            Invalidate();
+            _game.Direction = message.Player == Player.Black;
+            _game.BlackScore = message.BlackScore;
+            _game.WhiteScore = message.WhiteScore;
+            UpdateStatusText(message.Step);
+            UpdateStatus();
+            if (message.Player == Player.Black)
+            {
+                var item = new LogItem() { Number = _game.Log.Count + 1, White = message.Step };
+                item.AddToMap(_board.GetMap().DeepClone());
+                _game.Log.Add(item);
+                lvLog.VirtualListSize = _game.Log.Count;
+                var lvi = lvLog.Items[lvLog.Items.Count - 1];
+                lvLog.FocusedItem = lvi;
+                lvi.EnsureVisible();
+                lvLog.Invalidate();
+            }
+            else
+            {
+                var item = _game.Log[_game.Log.Count - 1];
+                item.Black = message.Step;
+                item.AddToMap(_board.GetMap().DeepClone());
+                lvLog.Invalidate();
+            }
         }
 
         private void CheckersForm_Load(object sender, EventArgs e)
         {
-            btnRefreshPeers.Enabled = _net.Start(Properties.Settings.Default.P2PPort, 
-                       Properties.Settings.Default.P2PUserName,
-                       Environment.MachineName);
             // Конфигурирование игры
             _board.ResetMap();
             var size = _io.GetDrawBoardSize();
@@ -147,13 +178,19 @@ namespace Checkers
         {
             lbWhiteScore.Text = string.Format("Белые: {0}", _game.WhiteScore);
             lbBlackScore.Text = string.Format("Чёрные: {0}", _game.BlackScore);
-            status.Text = _game.WinPlayer == WinPlayer.White
+            UpdateStatusText(_game.WinPlayer == WinPlayer.White
                 ? "Белые выиграли" 
                 : _game.WinPlayer == WinPlayer.Black 
                        ? "Чёрные выиграли" 
                        : _game.WinPlayer == WinPlayer.Draw 
                                 ? "Ничья" 
-                                : _game.Direction ? "Ход чёрных..." : "Ход белых...";
+                                : _game.Direction ? "Ход чёрных..." : "Ход белых...");
+        }
+
+        private void UpdateStatusText(string text)
+        {
+            status.Text = text;
+            mainStatus.Refresh();
         }
 
         private void CheckersForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -283,7 +320,7 @@ namespace Checkers
                 UpdateStatus();
             }
             else
-                status.Text = string.Format("Положение фигур после {0}-го хода.", n + 1);
+                UpdateStatusText(string.Format("Положение фигур после {0}-го хода.", n + 1));
         }
 
         private void tsmiTunings_Click(object sender, EventArgs e)
@@ -311,7 +348,7 @@ namespace Checkers
             tsmiSelectSide.Enabled = false;
             _board.Mode = PlayMode.Collocation; // расстановка
             panelLog.Visible = false;
-            status.Text = "Режим расстановки шашек";
+            UpdateStatusText("Режим расстановки шашек");
             Invalidate();
         }
 
@@ -360,23 +397,18 @@ namespace Checkers
             _net.Stop();
         }
 
-        private void btnRefreshPeers_Click(object sender, EventArgs e)
+        private void tsmiNetGame_Click(object sender, EventArgs e)
         {
-            if (_net.Started)
-            {
-                lbPeerList.Items.Clear();
-                _net.RefreshPeers();
-                btnRefreshPeers.Enabled = false;
-            }
-        }
-
-        private void lbPeerList_DoubleClick(object sender, EventArgs e)
-        {
-            if (lbPeerList.SelectedIndex >= 0)
+            var frm = new SelectNetEnemy(_net);
+            if (frm.ShowDialog(this) == DialogResult.OK)
             {
                 // Получение пира и прокси, для отправки сообщения
-                var peerEntry = lbPeerList.SelectedItem as PeerEntry;
-                if (_net.Started) _net.SendMessasge(peerEntry);
+                if (_net.Started && frm.Selected.State == PeerState.User)
+                    _net.Enemy = frm.Selected;
+                if (_net.Started)
+                    // Установка заголовка окна
+                    this.Text = string.Format("Шашки - {0}", Properties.Settings.Default.P2PUserName);
+
             }
         }
     }

@@ -97,6 +97,7 @@ namespace Checkers
             var whiteCheckers = Mode == PlayMode.Game ? "a1,c1,e1,g1,b2,d2,f2,h2,a3,c3,e3,g3" : "";
             var blackCheckers = Mode == PlayMode.Game ? "b6,d6,f6,h6,a7,c7,e7,g7,b8,d8,f8,h8" : "";
             _cells.Clear();
+            _fields.Clear();
             _game.Direction = false;
             Selected = null;
             var black = false;  // признак чередования цветов полей
@@ -118,6 +119,61 @@ namespace Checkers
                     black = !black; // чередуем цвет в столбце
                 }
                 black = !black;     // чередуем цвет в строке
+            }
+        }
+
+        public override string ToString()
+        {
+            var list = new List<string>();
+            foreach (var item in _cells.Values)
+            {
+                var cell = (Cell)item;
+                switch (cell.State)
+                {
+                    case State.Black:
+                        list.Add(string.Format("{0}{1}", cell.King ? "B":"b", cell.Address));
+                        break;
+                    case State.White:
+                        list.Add(string.Format("{0}{1}", cell.King ? "W" : "w", cell.Address));
+                        break;
+                }
+            }
+            return string.Join(",", list);
+        }
+
+        public void SetMap(string text)
+        {
+            // очистка доски
+            foreach (var item in _cells.Values)
+            {
+                var cell = (Cell)item;
+                if (cell.State == State.Prohibited) continue;
+                cell.King = false;
+                cell.State = State.Empty;
+            }
+            // расстановка полученных фигур
+            foreach (var value in text.Split(new[] { ',' }))
+            {
+                if (value.Length != 3) continue;
+                var address = new Address(value.Substring(1));
+                var cell = (Cell)_cells[address];
+                switch (value[0])
+                {
+                    case 'b':
+                        cell.State = State.Black;
+                        break;
+                    case 'B':
+                        cell.State = State.Black;
+                        cell.King = true;
+                        break;
+                    case 'w':
+                        cell.State = State.White;
+                        break;
+                    case 'W':
+                        cell.State = State.White;
+                        cell.King = true;
+                        break;
+                }
             }
         }
 

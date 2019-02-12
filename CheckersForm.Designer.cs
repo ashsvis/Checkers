@@ -56,6 +56,7 @@
             this.tsbNewGame = new System.Windows.Forms.ToolStripButton();
             this.tsbOpenGame = new System.Windows.Forms.ToolStripButton();
             this.tsbSaveGame = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.lbBlackScore = new System.Windows.Forms.Label();
             this.lbWhiteScore = new System.Windows.Forms.Label();
             this.lvLog = new System.Windows.Forms.ListView();
@@ -67,10 +68,7 @@
             this.panelLog = new System.Windows.Forms.Panel();
             this.saveGameDialog = new System.Windows.Forms.SaveFileDialog();
             this.openGameDialog = new System.Windows.Forms.OpenFileDialog();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.label3 = new System.Windows.Forms.Label();
-            this.lbPeerList = new System.Windows.Forms.ListBox();
-            this.btnRefreshPeers = new System.Windows.Forms.Button();
+            this.tsmiNetGame = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenu.SuspendLayout();
             this.mainStatus.SuspendLayout();
             this.mainTools.SuspendLayout();
@@ -94,6 +92,7 @@
             // 
             this.tsmiGame.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsmiNewGame,
+            this.tsmiNetGame,
             this.tsmiOpenGame,
             this.toolStripSeparator,
             this.tsmiSaveGame,
@@ -109,7 +108,7 @@
             this.tsmiNewGame.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsmiNewGame.Name = "tsmiNewGame";
             this.tsmiNewGame.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
-            this.tsmiNewGame.Size = new System.Drawing.Size(172, 22);
+            this.tsmiNewGame.Size = new System.Drawing.Size(180, 22);
             this.tsmiNewGame.Text = "&Новая";
             this.tsmiNewGame.Click += new System.EventHandler(this.tsmiNewGame_Click);
             // 
@@ -119,14 +118,14 @@
             this.tsmiOpenGame.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsmiOpenGame.Name = "tsmiOpenGame";
             this.tsmiOpenGame.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.tsmiOpenGame.Size = new System.Drawing.Size(172, 22);
+            this.tsmiOpenGame.Size = new System.Drawing.Size(180, 22);
             this.tsmiOpenGame.Text = "&Открыть";
             this.tsmiOpenGame.Click += new System.EventHandler(this.tsmiOpenGame_Click);
             // 
             // toolStripSeparator
             // 
             this.toolStripSeparator.Name = "toolStripSeparator";
-            this.toolStripSeparator.Size = new System.Drawing.Size(169, 6);
+            this.toolStripSeparator.Size = new System.Drawing.Size(177, 6);
             // 
             // tsmiSaveGame
             // 
@@ -135,19 +134,19 @@
             this.tsmiSaveGame.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsmiSaveGame.Name = "tsmiSaveGame";
             this.tsmiSaveGame.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.tsmiSaveGame.Size = new System.Drawing.Size(172, 22);
+            this.tsmiSaveGame.Size = new System.Drawing.Size(180, 22);
             this.tsmiSaveGame.Text = "&Сохранить";
             this.tsmiSaveGame.Click += new System.EventHandler(this.tsmiSaveGame_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(169, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
             // 
             // tsmiExit
             // 
             this.tsmiExit.Name = "tsmiExit";
-            this.tsmiExit.Size = new System.Drawing.Size(172, 22);
+            this.tsmiExit.Size = new System.Drawing.Size(180, 22);
             this.tsmiExit.Text = "Вы&ход";
             this.tsmiExit.Click += new System.EventHandler(this.tsmiExit_Click);
             // 
@@ -314,6 +313,11 @@
             this.tsbSaveGame.Text = "&Сохранить";
             this.tsbSaveGame.Click += new System.EventHandler(this.tsmiSaveGame_Click);
             // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            // 
             // lbBlackScore
             // 
             this.lbBlackScore.BackColor = System.Drawing.Color.Black;
@@ -355,7 +359,7 @@
             this.lvLog.Name = "lvLog";
             this.lvLog.ShowGroups = false;
             this.lvLog.ShowItemToolTips = true;
-            this.lvLog.Size = new System.Drawing.Size(221, 121);
+            this.lvLog.Size = new System.Drawing.Size(221, 235);
             this.lvLog.TabIndex = 1;
             this.lvLog.UseCompatibleStateImageBehavior = false;
             this.lvLog.View = System.Windows.Forms.View.Details;
@@ -399,13 +403,10 @@
             // panelLog
             // 
             this.panelLog.BackColor = System.Drawing.Color.DarkGray;
-            this.panelLog.Controls.Add(this.btnRefreshPeers);
-            this.panelLog.Controls.Add(this.lbPeerList);
             this.panelLog.Controls.Add(this.lvLog);
             this.panelLog.Controls.Add(this.label2);
             this.panelLog.Controls.Add(this.lbBlackScore);
             this.panelLog.Controls.Add(this.lbWhiteScore);
-            this.panelLog.Controls.Add(this.label3);
             this.panelLog.Controls.Add(this.label1);
             this.panelLog.Dock = System.Windows.Forms.DockStyle.Right;
             this.panelLog.Location = new System.Drawing.Point(263, 49);
@@ -425,43 +426,12 @@
             this.openGameDialog.Filter = "*.che|*.che";
             this.openGameDialog.Title = "Загрузить игру";
             // 
-            // toolStripSeparator1
+            // tsmiNetGame
             // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
-            // 
-            // label3
-            // 
-            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(5, 206);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(88, 15);
-            this.label3.TabIndex = 0;
-            this.label3.Text = "Список пиров:";
-            // 
-            // lbPeerList
-            // 
-            this.lbPeerList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.lbPeerList.FormattingEnabled = true;
-            this.lbPeerList.ItemHeight = 15;
-            this.lbPeerList.Location = new System.Drawing.Point(8, 228);
-            this.lbPeerList.Name = "lbPeerList";
-            this.lbPeerList.Size = new System.Drawing.Size(221, 79);
-            this.lbPeerList.TabIndex = 3;
-            this.lbPeerList.DoubleClick += new System.EventHandler(this.lbPeerList_DoubleClick);
-            // 
-            // btnRefreshPeers
-            // 
-            this.btnRefreshPeers.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnRefreshPeers.Location = new System.Drawing.Point(99, 201);
-            this.btnRefreshPeers.Name = "btnRefreshPeers";
-            this.btnRefreshPeers.Size = new System.Drawing.Size(75, 24);
-            this.btnRefreshPeers.TabIndex = 4;
-            this.btnRefreshPeers.Text = "Обновить";
-            this.btnRefreshPeers.UseVisualStyleBackColor = true;
-            this.btnRefreshPeers.Click += new System.EventHandler(this.btnRefreshPeers_Click);
+            this.tsmiNetGame.Name = "tsmiNetGame";
+            this.tsmiNetGame.Size = new System.Drawing.Size(180, 22);
+            this.tsmiNetGame.Text = "Игра по сети...";
+            this.tsmiNetGame.Click += new System.EventHandler(this.tsmiNetGame_Click);
             // 
             // CheckersForm
             // 
@@ -540,9 +510,7 @@
         private System.Windows.Forms.SaveFileDialog saveGameDialog;
         private System.Windows.Forms.OpenFileDialog openGameDialog;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ListBox lbPeerList;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Button btnRefreshPeers;
+        private System.Windows.Forms.ToolStripMenuItem tsmiNetGame;
     }
 }
 

@@ -61,11 +61,18 @@
     <Compile Include="Core\LogItem.cs" />
     <Compile Include="Core\ObjectCloner.cs" />
     <Compile Include="Net\NetGame.cs" />
+    <Compile Include="Net\P2PData.cs" />
     <Compile Include="Net\P2PService.cs" />
     <Compile Include="Net\PeerEntry.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Core\SaverLoader.cs" />
+    <Compile Include="SelectNetEnemy.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SelectNetEnemy.Designer.cs">
+      <DependentUpon>SelectNetEnemy.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="CheckersForm.resx">
       <DependentUpon>CheckersForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -78,6 +85,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="SelectNetEnemy.resx">
+      <DependentUpon>SelectNetEnemy.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="ClassDiagram1.cd" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

@@ -9,7 +9,7 @@ namespace Checkers.Net
     public class NetGame : IDisplayMessage
     {
         private P2PService localService;
-        private string serviceUrl;
+        //private string serviceUrl;
         private ServiceHost host;
         private PeerName peerName;
         private PeerNameRegistration peerNameRegistration;
@@ -21,6 +21,8 @@ namespace Checkers.Net
         public bool CanRefreshPeers { get; set; }
 
         public List<PeerEntry> PeerList { get; set; }
+
+        public PeerEntry Enemy { get; set; }
 
         public NetGame()
         {
@@ -60,6 +62,7 @@ namespace Checkers.Net
                    new PeerEntry
                    {
                        DisplayString = "Пиры не найдены.",
+                       State = PeerState.NotFound,
                        ButtonsEnabled = false
                    });
             }
@@ -96,6 +99,7 @@ namespace Checkers.Net
                                PeerName = peer.PeerName,
                                ServiceProxy = serviceProxy,
                                DisplayString = serviceProxy.GetName(),
+                               State = PeerState.User,
                                ButtonsEnabled = true
                            });
                         OnResolveProgressChanged();
@@ -107,6 +111,7 @@ namespace Checkers.Net
                            {
                                PeerName = peer.PeerName,
                                DisplayString = "Неизвестный пир",
+                               State = PeerState.Unknown,
                                ButtonsEnabled = false
                            });
                         OnResolveProgressChanged();
@@ -115,14 +120,14 @@ namespace Checkers.Net
             }
         }
 
-        public void SendMessasge(PeerEntry peerEntry)
+        public void SendMessasge(PeerEntry peerEntry, P2PData message)
         {
             // Получение пира и прокси, для отправки сообщения
             if (peerEntry != null && peerEntry.ServiceProxy != null)
             {
                 try
                 {
-                    peerEntry.ServiceProxy.SendMessage("Привет друг!", Properties.Settings.Default.P2PUserName);
+                    peerEntry.ServiceProxy.SendMessage(message, Properties.Settings.Default.P2PUserName);
                 }
                 catch (CommunicationException)
                 {
@@ -131,14 +136,14 @@ namespace Checkers.Net
             }
         }
 
-        public event Action<string, string> DisplayPeerMessage = delegate { };
+        public event Action<P2PData, string> DisplayPeerMessage = delegate { };
 
-        private void OnDisplayPeerMessage(string message, string from)
+        private void OnDisplayPeerMessage(P2PData message, string from)
         {
             DisplayPeerMessage(message, from);
         }
 
-        public void DisplayMessage(string message, string from)
+        public void DisplayMessage(P2PData message, string from)
         {
             OnDisplayPeerMessage(message, from);
         }
@@ -146,6 +151,7 @@ namespace Checkers.Net
         public bool Start(string port, string username, string machineName)
         {
             if (Started) return true;
+            Enemy = null;
             Started = false;
 
             #region Взято отюда: https://professorweb.ru/my/csharp/web/level8/8_3.php
@@ -153,9 +159,6 @@ namespace Checkers.Net
             // Конфигурирование сети 
             // Получение конфигурационной информации из app.config
             string serviceUrl = null;
-
-            // Установка заголовка окна
-            //this.Text = string.Format("P2P приложение - {0}", username);
 
             //  Получение URL-адреса службы с использованием адресаIPv4 
             //  и порта из конфигурационного файла

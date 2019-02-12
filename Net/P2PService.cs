@@ -4,7 +4,7 @@ namespace Checkers.Net
 {
     public interface IDisplayMessage
     {
-        void DisplayMessage(string message, string from);
+        void DisplayMessage(P2PData message, string from);
     }
 
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
@@ -24,7 +24,7 @@ namespace Checkers.Net
             return username;
         }
 
-        public void SendMessage(string message, string from)
+        public void SendMessage(P2PData message, string from)
         {
             hostReference.DisplayMessage(message, from);
         }
