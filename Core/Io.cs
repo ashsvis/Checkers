@@ -266,6 +266,11 @@ namespace Checkers
             // если под курсором найдена разрешённая ячейка
             if (GetCell(location, out cell) && cell.State != State.Prohibited)
             {
+                if (_board.Mode == PlayMode.Game || _board.Mode == PlayMode.NetGame)
+                {
+                    if (_game.Player == Player.Black && !_game.Direction ||
+                    _game.Player == Player.White && _game.Direction) return;
+                }
                 // и эта ячейка другая 
                 if (cell != _lastCell)
                 {

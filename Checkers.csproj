@@ -57,6 +57,12 @@
     </Compile>
     <Compile Include="Core\Game.cs" />
     <Compile Include="Core\Io.cs" />
+    <Compile Include="CreateNetGame.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CreateNetGame.Designer.cs">
+      <DependentUpon>CreateNetGame.cs</DependentUpon>
+    </Compile>
     <Compile Include="Net\IP2PService.cs" />
     <Compile Include="Core\LogItem.cs" />
     <Compile Include="Core\ObjectCloner.cs" />
@@ -75,6 +81,9 @@
     </Compile>
     <EmbeddedResource Include="CheckersForm.resx">
       <DependentUpon>CheckersForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CreateNetGame.resx">
+      <DependentUpon>CreateNetGame.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

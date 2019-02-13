@@ -38,13 +38,9 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmiExit = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTools = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiSelectSide = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiWhiteSide = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiBlackSide = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiAutoGame = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiNetGame = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsmiApplicationMode = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiGameMode = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiCollocationMode = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTunings = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiHelp = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiRules = new System.Windows.Forms.ToolStripMenuItem();
@@ -68,7 +64,7 @@
             this.panelLog = new System.Windows.Forms.Panel();
             this.saveGameDialog = new System.Windows.Forms.SaveFileDialog();
             this.openGameDialog = new System.Windows.Forms.OpenFileDialog();
-            this.tsmiNetGame = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiSelfGame = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenu.SuspendLayout();
             this.mainStatus.SuspendLayout();
             this.mainTools.SuspendLayout();
@@ -92,7 +88,6 @@
             // 
             this.tsmiGame.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsmiNewGame,
-            this.tsmiNetGame,
             this.tsmiOpenGame,
             this.toolStripSeparator,
             this.tsmiSaveGame,
@@ -108,7 +103,7 @@
             this.tsmiNewGame.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsmiNewGame.Name = "tsmiNewGame";
             this.tsmiNewGame.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
-            this.tsmiNewGame.Size = new System.Drawing.Size(180, 22);
+            this.tsmiNewGame.Size = new System.Drawing.Size(172, 22);
             this.tsmiNewGame.Text = "&Новая";
             this.tsmiNewGame.Click += new System.EventHandler(this.tsmiNewGame_Click);
             // 
@@ -118,14 +113,14 @@
             this.tsmiOpenGame.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsmiOpenGame.Name = "tsmiOpenGame";
             this.tsmiOpenGame.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.tsmiOpenGame.Size = new System.Drawing.Size(180, 22);
+            this.tsmiOpenGame.Size = new System.Drawing.Size(172, 22);
             this.tsmiOpenGame.Text = "&Открыть";
             this.tsmiOpenGame.Click += new System.EventHandler(this.tsmiOpenGame_Click);
             // 
             // toolStripSeparator
             // 
             this.toolStripSeparator.Name = "toolStripSeparator";
-            this.toolStripSeparator.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator.Size = new System.Drawing.Size(169, 6);
             // 
             // tsmiSaveGame
             // 
@@ -134,91 +129,59 @@
             this.tsmiSaveGame.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsmiSaveGame.Name = "tsmiSaveGame";
             this.tsmiSaveGame.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.tsmiSaveGame.Size = new System.Drawing.Size(180, 22);
+            this.tsmiSaveGame.Size = new System.Drawing.Size(172, 22);
             this.tsmiSaveGame.Text = "&Сохранить";
             this.tsmiSaveGame.Click += new System.EventHandler(this.tsmiSaveGame_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(169, 6);
             // 
             // tsmiExit
             // 
             this.tsmiExit.Name = "tsmiExit";
-            this.tsmiExit.Size = new System.Drawing.Size(180, 22);
+            this.tsmiExit.Size = new System.Drawing.Size(172, 22);
             this.tsmiExit.Text = "Вы&ход";
             this.tsmiExit.Click += new System.EventHandler(this.tsmiExit_Click);
             // 
             // tsmiTools
             // 
             this.tsmiTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsmiSelectSide,
+            this.tsmiSelfGame,
+            this.tsmiAutoGame,
+            this.tsmiNetGame,
             this.toolStripMenuItem1,
-            this.tsmiApplicationMode,
             this.tsmiTunings});
             this.tsmiTools.Name = "tsmiTools";
             this.tsmiTools.Size = new System.Drawing.Size(79, 20);
             this.tsmiTools.Text = "&Настройки";
+            this.tsmiTools.DropDownOpening += new System.EventHandler(this.tsmiTools_DropDownOpening);
             // 
-            // tsmiSelectSide
+            // tsmiAutoGame
             // 
-            this.tsmiSelectSide.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsmiWhiteSide,
-            this.tsmiBlackSide});
-            this.tsmiSelectSide.Name = "tsmiSelectSide";
-            this.tsmiSelectSide.Size = new System.Drawing.Size(162, 22);
-            this.tsmiSelectSide.Text = "Выбор стороны";
-            this.tsmiSelectSide.DropDownOpening += new System.EventHandler(this.tsmiSelectSide_DropDownOpening);
+            this.tsmiAutoGame.Name = "tsmiAutoGame";
+            this.tsmiAutoGame.Size = new System.Drawing.Size(192, 22);
+            this.tsmiAutoGame.Text = "Игра с компьютером";
+            this.tsmiAutoGame.Click += new System.EventHandler(this.tsmiAutoGame_Click);
             // 
-            // tsmiWhiteSide
+            // tsmiNetGame
             // 
-            this.tsmiWhiteSide.Name = "tsmiWhiteSide";
-            this.tsmiWhiteSide.Size = new System.Drawing.Size(117, 22);
-            this.tsmiWhiteSide.Text = "Белые";
-            this.tsmiWhiteSide.Click += new System.EventHandler(this.tsmiPlayerWhite_Click);
-            // 
-            // tsmiBlackSide
-            // 
-            this.tsmiBlackSide.Name = "tsmiBlackSide";
-            this.tsmiBlackSide.Size = new System.Drawing.Size(117, 22);
-            this.tsmiBlackSide.Text = "Чёрные";
-            this.tsmiBlackSide.Click += new System.EventHandler(this.tsmiPlayerWhite_Click);
+            this.tsmiNetGame.Name = "tsmiNetGame";
+            this.tsmiNetGame.Size = new System.Drawing.Size(192, 22);
+            this.tsmiNetGame.Text = "Игра по сети";
+            this.tsmiNetGame.Click += new System.EventHandler(this.tsmiNetGame_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(159, 6);
-            // 
-            // tsmiApplicationMode
-            // 
-            this.tsmiApplicationMode.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsmiGameMode,
-            this.tsmiCollocationMode});
-            this.tsmiApplicationMode.Name = "tsmiApplicationMode";
-            this.tsmiApplicationMode.Size = new System.Drawing.Size(162, 22);
-            this.tsmiApplicationMode.Text = "Режим работы";
-            this.tsmiApplicationMode.DropDownOpening += new System.EventHandler(this.tsmiApplicationMode_DropDownOpening);
-            // 
-            // tsmiGameMode
-            // 
-            this.tsmiGameMode.Name = "tsmiGameMode";
-            this.tsmiGameMode.Size = new System.Drawing.Size(142, 22);
-            this.tsmiGameMode.Text = "Игра";
-            this.tsmiGameMode.Click += new System.EventHandler(this.tsmiGameMode_Click);
-            // 
-            // tsmiCollocationMode
-            // 
-            this.tsmiCollocationMode.Name = "tsmiCollocationMode";
-            this.tsmiCollocationMode.Size = new System.Drawing.Size(142, 22);
-            this.tsmiCollocationMode.Text = "Расстановка";
-            this.tsmiCollocationMode.Click += new System.EventHandler(this.tsmiCollocationMode_Click);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(189, 6);
             // 
             // tsmiTunings
             // 
             this.tsmiTunings.Enabled = false;
             this.tsmiTunings.Name = "tsmiTunings";
-            this.tsmiTunings.Size = new System.Drawing.Size(162, 22);
+            this.tsmiTunings.Size = new System.Drawing.Size(192, 22);
             this.tsmiTunings.Text = "&Параметры...";
             this.tsmiTunings.Click += new System.EventHandler(this.tsmiTunings_Click);
             // 
@@ -426,12 +389,12 @@
             this.openGameDialog.Filter = "*.che|*.che";
             this.openGameDialog.Title = "Загрузить игру";
             // 
-            // tsmiNetGame
+            // tsmiSelfGame
             // 
-            this.tsmiNetGame.Name = "tsmiNetGame";
-            this.tsmiNetGame.Size = new System.Drawing.Size(180, 22);
-            this.tsmiNetGame.Text = "Игра по сети...";
-            this.tsmiNetGame.Click += new System.EventHandler(this.tsmiNetGame_Click);
+            this.tsmiSelfGame.Name = "tsmiSelfGame";
+            this.tsmiSelfGame.Size = new System.Drawing.Size(192, 22);
+            this.tsmiSelfGame.Text = "Игра с самим собой";
+            this.tsmiSelfGame.Click += new System.EventHandler(this.tsmiSelfGame_Click);
             // 
             // CheckersForm
             // 
@@ -499,18 +462,14 @@
         private System.Windows.Forms.Label lbBlackScore;
         private System.Windows.Forms.Label lbWhiteScore;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.ToolStripMenuItem tsmiSelectSide;
-        private System.Windows.Forms.ToolStripMenuItem tsmiWhiteSide;
-        private System.Windows.Forms.ToolStripMenuItem tsmiBlackSide;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem tsmiApplicationMode;
-        private System.Windows.Forms.ToolStripMenuItem tsmiGameMode;
-        private System.Windows.Forms.ToolStripMenuItem tsmiCollocationMode;
         private System.Windows.Forms.Panel panelLog;
         private System.Windows.Forms.SaveFileDialog saveGameDialog;
         private System.Windows.Forms.OpenFileDialog openGameDialog;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem tsmiAutoGame;
         private System.Windows.Forms.ToolStripMenuItem tsmiNetGame;
+        private System.Windows.Forms.ToolStripMenuItem tsmiSelfGame;
     }
 }
 

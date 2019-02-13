@@ -8,6 +8,9 @@ namespace Checkers.Net
         [OperationContract]
         string GetName();
 
+        [OperationContract]
+        Player GetPlayer();
+
         [OperationContract(IsOneWay = true)]
         void SendMessage(P2PData message, string from);
     }

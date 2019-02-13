@@ -10,13 +10,15 @@ namespace Checkers
     public enum MoveResult
     {
         Prohibited,                 // запрещено
-        SuccessfullMove,            // разрешённое пермещение
+        SuccessfullMove,            // разрешённый простой ход
         SuccessfullCombat           // разрешённое взятие шашки противника
     }
 
     public enum PlayMode
     {
-        Game,       // игра
+        Game,       // игра с компьютером
+        NetGame,    // игра по сети
+        SelfGame,   // игра с самим собой
         Collocation // расстановка фишек
     }
 
@@ -94,8 +96,8 @@ namespace Checkers
 
         public void ResetMap()
         {
-            var whiteCheckers = Mode == PlayMode.Game ? "a1,c1,e1,g1,b2,d2,f2,h2,a3,c3,e3,g3" : "";
-            var blackCheckers = Mode == PlayMode.Game ? "b6,d6,f6,h6,a7,c7,e7,g7,b8,d8,f8,h8" : "";
+            var whiteCheckers = "a1,c1,e1,g1,b2,d2,f2,h2,a3,c3,e3,g3";
+            var blackCheckers = "b6,d6,f6,h6,a7,c7,e7,g7,b8,d8,f8,h8";
             _cells.Clear();
             _fields.Clear();
             _game.Direction = false;
@@ -437,6 +439,11 @@ namespace Checkers
             Cell cell;
             if (GetCell(location, out cell) && cell.State != State.Prohibited)
             {
+                if (Mode == PlayMode.Game || Mode == PlayMode.NetGame)
+                {
+                    if (_game.Player == Player.Black && !_game.Direction ||
+                        _game.Player == Player.White && _game.Direction) return;
+                }
                 // если ячейка не пустая, но не может быть выбрана
                 if (cell.State != State.Empty && !CanCellEnter(cell))
                     return;
@@ -452,6 +459,11 @@ namespace Checkers
             Cell cell;
             if (GetCell(location, out cell) && cell.State != State.Prohibited)
             {
+                if (Mode == PlayMode.Game || Mode == PlayMode.NetGame)
+                {
+                    if (_game.Player == Player.Black && !_game.Direction ||
+                   _game.Player == Player.White && _game.Direction) return;
+                }
                 if (Selected != null && cell.State == State.Empty) // ранее была выбрана фишка и выбрана пустая клетка
                 // пробуем делать ход
                 {

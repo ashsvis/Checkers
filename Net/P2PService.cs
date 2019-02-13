@@ -12,16 +12,23 @@ namespace Checkers.Net
     {
         private IDisplayMessage hostReference;
         private string username;
+        private Player player;
 
-        public P2PService(IDisplayMessage hostReference, string username)
+        public P2PService(IDisplayMessage hostReference, string username, Player player)
         {
             this.hostReference = hostReference;
             this.username = username;
+            this.player = player;
         }
 
         public string GetName()
         {
             return username;
+        }
+
+        public Player GetPlayer()
+        {
+            return player;
         }
 
         public void SendMessage(P2PData message, string from)

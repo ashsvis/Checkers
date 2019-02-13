@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.PeerToPeer;
 using System.ServiceModel;
+using System.Threading.Tasks;
 
 namespace Checkers.Net
 {
@@ -29,7 +30,14 @@ namespace Checkers.Net
             PeerList = new List<PeerEntry>();
         }
 
-        public void RefreshPeers()
+        public Task RefreshPeersAsync()
+        {
+            var task = new Task(() => RefreshPeers());
+            task.Start();
+            return task;
+        }
+
+        private void RefreshPeers()
         {
             // Создание распознавателя и добавление обработчиков событий
             PeerNameResolver resolver = new PeerNameResolver();
@@ -63,7 +71,7 @@ namespace Checkers.Net
                    {
                        DisplayString = "Пиры не найдены.",
                        State = PeerState.NotFound,
-                       ButtonsEnabled = false
+                       Player = Player.White
                    });
             }
             // Повторно включаем кнопку "обновить"
@@ -100,7 +108,7 @@ namespace Checkers.Net
                                ServiceProxy = serviceProxy,
                                DisplayString = serviceProxy.GetName(),
                                State = PeerState.User,
-                               ButtonsEnabled = true
+                               Player = serviceProxy.GetPlayer()
                            });
                         OnResolveProgressChanged();
                     }
@@ -112,7 +120,7 @@ namespace Checkers.Net
                                PeerName = peer.PeerName,
                                DisplayString = "Неизвестный пир",
                                State = PeerState.Unknown,
-                               ButtonsEnabled = false
+                               Player = Player.White
                            });
                         OnResolveProgressChanged();
                     }
@@ -148,7 +156,7 @@ namespace Checkers.Net
             OnDisplayPeerMessage(message, from);
         }
 
-        public bool Start(string port, string username, string machineName)
+        private bool Start(string port, string username, Player player, string machineName)
         {
             if (Started) return true;
             Enemy = null;
@@ -180,7 +188,7 @@ namespace Checkers.Net
             }
 
             // Регистрация и запуск службы WCF
-            localService = new P2PService(this, username);
+            localService = new P2PService(this, username, player);
 
             host = new ServiceHost(localService, new Uri(serviceUrl));
             NetTcpBinding binding = new NetTcpBinding();
@@ -215,9 +223,17 @@ namespace Checkers.Net
             return Started;
         }
 
-        public void Stop()
+        public Task<bool> StartAsync(string port, string username, Player player, string machineName)
+        {
+            var task = new Task<bool>(() => Start(port, username, player, machineName));
+            task.Start();
+            return task;
+        }
+
+        private void Stop()
         {
             if (!Started) return;
+            Started = false;
 
             #region Взято отюда: https://professorweb.ru/my/csharp/web/level8/8_3.php
 
@@ -229,5 +245,14 @@ namespace Checkers.Net
 
             #endregion
         }
+
+        public Task StopAsync()
+        {
+            var task = new Task(() => Stop());
+            task.Start();
+            return task;
+        }
+
+
     }
 }

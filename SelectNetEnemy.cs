@@ -6,6 +6,8 @@ namespace Checkers
 {
     public partial class SelectNetEnemy : Form
     {
+        private Form _form;
+        private Game _game;
         private NetGame _net;
 
         public PeerEntry Selected
@@ -16,22 +18,36 @@ namespace Checkers
             }
         }
 
-        public SelectNetEnemy(NetGame net)
+        public SelectNetEnemy(Form form, NetGame net, Game game)
         {
             InitializeComponent();
+            _form = form;
+            _game = game;
             _net = net;
             _net.ResolveProgressChanged += _net_ResolveProgressChanged;
             _net.ResolveCompleted += _net_ResolveCompleted;
-            _net.Start(Properties.Settings.Default.P2PPort,
-                       Properties.Settings.Default.P2PUserName,
+        }
+
+        private async void NetStart()
+        {
+            await _net.StartAsync(Properties.Settings.Default.P2PPort,
+                       Properties.Settings.Default.P2PUserName, _game.Player,
                        Environment.MachineName);
+            LoadPeers();
         }
 
         private void _net_ResolveCompleted()
         {
             UpdatePeerList();
             // Повторно включаем кнопку "обновить"
-            btnRefreshPeers.Enabled = _net.CanRefreshPeers;
+            var method = new MethodInvoker(() =>
+            {
+                btnRefreshPeers.Enabled = _net.CanRefreshPeers;
+            });
+            if (InvokeRequired)
+                BeginInvoke(method);
+            else
+                method();
         }
 
         private void _net_ResolveProgressChanged()
@@ -41,28 +57,35 @@ namespace Checkers
 
         private void UpdatePeerList()
         {
-            lbPeerList.Items.Clear();
-            foreach (var item in _net.PeerList)
+            var method = new MethodInvoker(() =>
             {
-                if (item.State != PeerState.Unknown)
-                    lbPeerList.Items.Add(item);
-            }
-            lbPeerList.Invalidate();
+                lbPeerList.Items.Clear();
+                foreach (var item in _net.PeerList.ToArray())
+                {
+                    if (item.State == PeerState.User)
+                        lbPeerList.Items.Add(item);
+                }
+                lbPeerList.Invalidate();
+            });
+            if (InvokeRequired)
+                BeginInvoke(method);
+            else
+                method();
         }
 
-        private void LoadPeers()
+        private async void LoadPeers()
         {
             if (_net.Started)
             {
-                lbPeerList.Items.Clear();
-                _net.RefreshPeers();
                 btnRefreshPeers.Enabled = false;
+                lbPeerList.Items.Clear();
+                await _net.RefreshPeersAsync();
             }
         }
 
         private void SelectNetEnemy_Load(object sender, EventArgs e)
         {
-            LoadPeers();
+            NetStart();
         }
 
         private void btnRefreshPeers_Click(object sender, EventArgs e)
@@ -79,6 +102,18 @@ namespace Checkers
         private void lbPeerList_SelectedIndexChanged(object sender, EventArgs e)
         {
             btnSelect.Enabled = _net.Started && Selected != null && Selected.State == PeerState.User;
+        }
+
+        private void btnCreateNetGame_Click(object sender, EventArgs e)
+        {
+            var frm = new CreateNetGame(this, _game);
+            if (frm.ShowDialog(this) == DialogResult.OK)
+            {
+                _game.Player = frm.GetPlayer();
+                _form.Invalidate();
+                DialogResult = DialogResult.Yes;
+                Close();
+            }
         }
     }
 }

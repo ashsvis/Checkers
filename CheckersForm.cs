@@ -21,8 +21,6 @@ namespace Checkers
             
             DoubleBuffered = true;
             _net = new NetGame();
-            //_net.ResolveProgressChanged += _net_ResolveProgressChanged;
-            //_net.ResolveCompleted += _net_ResolveCompleted;
             _net.DisplayPeerMessage += _net_DisplayPeerMessage;
             _game = new Game();
             _board = new Board(_game);
@@ -33,29 +31,6 @@ namespace Checkers
             _board.CheckerMoved += _board_CheckerMoved;
             _io = new Io(_game, _board, new Size(0, mainMenu.Height + mainTools.Height));
         }
-
-        //private void _net_ResolveCompleted()
-        //{
-        //    UpdatePeerList();
-        //    // Повторно включаем кнопку "обновить"
-        //    btnRefreshPeers.Enabled = _net.CanRefreshPeers;
-        //}
-
-        //private void _net_ResolveProgressChanged()
-        //{
-        //    UpdatePeerList();
-        //}
-
-        //private void UpdatePeerList()
-        //{
-        //    lbPeerList.Items.Clear();
-        //    foreach (var item in _net.PeerList)
-        //    {
-        //        if (item.State != PeerState.Unknown)
-        //            lbPeerList.Items.Add(item);
-        //    }
-        //    lbPeerList.Invalidate();
-        //}
 
         private bool _board_AskQuestion(string text, string caption)
         {
@@ -136,30 +111,38 @@ namespace Checkers
         {
             // Показать полученное сообщение (вызывается из службы WCF)
             _board.SetMap(message.Map);
-            Invalidate();
-            _game.Direction = message.Player == Player.Black;
-            _game.BlackScore = message.BlackScore;
-            _game.WhiteScore = message.WhiteScore;
-            UpdateStatusText(message.Step);
-            UpdateStatus();
-            if (message.Player == Player.Black)
+            var method = new MethodInvoker(() =>
             {
-                var item = new LogItem() { Number = _game.Log.Count + 1, White = message.Step };
-                item.AddToMap(_board.GetMap().DeepClone());
-                _game.Log.Add(item);
-                lvLog.VirtualListSize = _game.Log.Count;
-                var lvi = lvLog.Items[lvLog.Items.Count - 1];
-                lvLog.FocusedItem = lvi;
-                lvi.EnsureVisible();
-                lvLog.Invalidate();
-            }
+                Invalidate();
+                _game.Direction = message.Player == Player.Black;
+                _game.BlackScore = message.BlackScore;
+                _game.WhiteScore = message.WhiteScore;
+                UpdateStatusText(message.Step);
+                UpdateStatus();
+                if (message.Player == Player.Black)
+                {
+                    var item = new LogItem() { Number = _game.Log.Count + 1, White = message.Step };
+                    item.AddToMap(_board.GetMap().DeepClone());
+                    _game.Log.Add(item);
+                    lvLog.VirtualListSize = _game.Log.Count;
+                    var lvi = lvLog.Items[lvLog.Items.Count - 1];
+                    lvLog.FocusedItem = lvi;
+                    lvi.EnsureVisible();
+                    lvLog.Invalidate();
+                }
+                else
+                {
+                    var item = _game.Log[_game.Log.Count - 1];
+                    item.Black = message.Step;
+                    item.AddToMap(_board.GetMap().DeepClone());
+                    lvLog.Invalidate();
+                }
+            });
+            if (InvokeRequired)
+                BeginInvoke(method);
             else
-            {
-                var item = _game.Log[_game.Log.Count - 1];
-                item.Black = message.Step;
-                item.AddToMap(_board.GetMap().DeepClone());
-                lvLog.Invalidate();
-            }
+                method();
+
         }
 
         private void CheckersForm_Load(object sender, EventArgs e)
@@ -189,8 +172,15 @@ namespace Checkers
 
         private void UpdateStatusText(string text)
         {
-            status.Text = text;
-            mainStatus.Refresh();
+            var method = new MethodInvoker(() =>
+            {
+                status.Text = text;
+                mainStatus.Refresh();
+            });
+            if (InvokeRequired)
+                BeginInvoke(method);
+            else
+                method();
         }
 
         private void CheckersForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -245,11 +235,11 @@ namespace Checkers
         /// <param name="e"></param>
         private void tsmiPlayerWhite_Click(object sender, EventArgs e)
         {
-            if (sender == tsmiWhiteSide)
-                _game.Player = Player.White;
-            else if (sender == tsmiBlackSide)
-                _game.Player = Player.Black;
-            Invalidate();
+            //if (sender == tsmiWhiteSide)
+            //    _game.Player = Player.White;
+            //else if (sender == tsmiBlackSide)
+            //    _game.Player = Player.Black;
+            //Invalidate();
         }
 
         /// <summary>
@@ -259,8 +249,8 @@ namespace Checkers
         /// <param name="e"></param>
         private void tsmiSelectSide_DropDownOpening(object sender, EventArgs e)
         {
-            tsmiBlackSide.Checked = _game.Player == Player.Black;
-            tsmiWhiteSide.Checked = _game.Player == Player.White;
+            //tsmiBlackSide.Checked = _game.Player == Player.Black;
+            //tsmiWhiteSide.Checked = _game.Player == Player.White;
         }
 
         private void tsmiExit_Click(object sender, EventArgs e)
@@ -301,10 +291,6 @@ namespace Checkers
             var n = lvLog.SelectedIndices[0];
             _board.Selected = null;
 
-            //var map = _game.Log[n].GetLastMap().DeepClone();
-            //_board.SetMap(map);
-            //Invalidate();
-
             var semiSteps = _game.Log[n].GetMapSemiSteps();
             foreach (var item in semiSteps)
             {
@@ -330,13 +316,12 @@ namespace Checkers
 
         private void tsmiApplicationMode_DropDownOpening(object sender, EventArgs e)
         {
-            tsmiGameMode.Checked = _board.Mode == PlayMode.Game;
-            tsmiCollocationMode.Checked = _board.Mode == PlayMode.Collocation;
+            //tsmiGameMode.Checked = _board.Mode == PlayMode.Game;
+            //tsmiCollocationMode.Checked = _board.Mode == PlayMode.Collocation;
         }
 
         private void tsmiGameMode_Click(object sender, EventArgs e)
         {
-            tsmiSelectSide.Enabled = true;
             _board.Mode = PlayMode.Game; // игра
             panelLog.Visible = true;
             UpdateStatus();
@@ -345,7 +330,6 @@ namespace Checkers
 
         private void tsmiCollocationMode_Click(object sender, EventArgs e)
         {
-            tsmiSelectSide.Enabled = false;
             _board.Mode = PlayMode.Collocation; // расстановка
             panelLog.Visible = false;
             UpdateStatusText("Режим расстановки шашек");
@@ -394,21 +378,67 @@ namespace Checkers
                     SaveGame();
                 }
             }
-            _net.Stop();
+            NetStop();
+        }
+
+        private async void NetStop()
+        {
+            await _net.StopAsync();
+        }
+
+        private void tsmiTools_DropDownOpening(object sender, EventArgs e)
+        {
+            tsmiSelfGame.Checked = _board.Mode == PlayMode.SelfGame;
+            tsmiAutoGame.Checked = _board.Mode == PlayMode.Game;
+            tsmiNetGame.Checked = _board.Mode == PlayMode.NetGame;
+        }
+
+        private void tsmiSelfGame_Click(object sender, EventArgs e)
+        {
+            var last = _board.Mode;
+            _board.Mode = PlayMode.SelfGame;
+            if (last == PlayMode.NetGame)
+                NetStop();
+        }
+
+        private void tsmiAutoGame_Click(object sender, EventArgs e)
+        {
+            var last = _board.Mode;
+            _board.Mode = PlayMode.Game;
+            if (last == PlayMode.NetGame)
+                NetStop();
         }
 
         private void tsmiNetGame_Click(object sender, EventArgs e)
         {
-            var frm = new SelectNetEnemy(_net);
-            if (frm.ShowDialog(this) == DialogResult.OK)
-            {
-                // Получение пира и прокси, для отправки сообщения
-                if (_net.Started && frm.Selected.State == PeerState.User)
-                    _net.Enemy = frm.Selected;
-                if (_net.Started)
-                    // Установка заголовка окна
-                    this.Text = string.Format("Шашки - {0}", Properties.Settings.Default.P2PUserName);
+            _board.Mode = PlayMode.NetGame;
+            GameTuning();
+        }
 
+        private void GameTuning()
+        {
+            var frm = new SelectNetEnemy(this, _net, _game);
+            var result = frm.ShowDialog(this);
+            switch (result)
+            {
+                case DialogResult.OK:
+                    if (_net.Started && frm.Selected != null)
+                    {
+                        // Получение пира и прокси, для отправки сообщения
+                        if (frm.Selected.State == PeerState.User)
+                            _net.Enemy = frm.Selected;
+                        // Установка заголовка окна
+                        this.Text = string.Format("Шашки - {0} против {1}", 
+                            Properties.Settings.Default.P2PUserName, frm.Selected.DisplayString);
+                    }
+                    break;
+                case DialogResult.Yes:
+                    // Установка заголовка окна
+                    this.Text = string.Format("Шашки - {0} ожидает противника...", Properties.Settings.Default.P2PUserName);
+                    break;
+                default:
+                    NetStop();
+                    break;
             }
         }
     }
