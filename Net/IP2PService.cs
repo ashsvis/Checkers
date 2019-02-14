@@ -1,4 +1,5 @@
-﻿using System.ServiceModel;
+﻿using System;
+using System.ServiceModel;
 
 namespace Checkers.Net
 {
@@ -11,7 +12,14 @@ namespace Checkers.Net
         [OperationContract]
         Player GetPlayer();
 
+        [OperationContract]
+        Guid GetPlayerId();
+
         [OperationContract(IsOneWay = true)]
         void SendMessage(P2PData message, string from);
+
+        [OperationContract(IsOneWay = true)]
+        void SendConnect(Guid id, string from);
+
     }
 }

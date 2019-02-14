@@ -14,6 +14,8 @@ namespace Checkers.Net
         private ServiceHost host;
         private PeerName peerName;
         private PeerNameRegistration peerNameRegistration;
+        private Game _game;
+        private readonly Board _board;
 
         public bool Started { get; set; }
 
@@ -25,9 +27,46 @@ namespace Checkers.Net
 
         public PeerEntry Enemy { get; set; }
 
-        public NetGame()
+        public Guid Id { get; private set; }
+
+        public string Caption
+        {
+            get
+            {
+                if (_game.Mode == PlayMode.NetGame)
+                    return Enemy == null 
+                        ? string.Format("Шашки - {0} ожидает противника...", Properties.Settings.Default.P2PUserName)
+                        : _game.Player == Player.White 
+                              ? string.Format("Шашки - {0} против {1}", Properties.Settings.Default.P2PUserName, Enemy.DisplayString)
+                              : string.Format("Шашки - {0} против {1}", Enemy.DisplayString, Properties.Settings.Default.P2PUserName);
+
+                return "Шашки";
+            }
+        }
+
+        public NetGame(Game game, Board board)
         {
             PeerList = new List<PeerEntry>();
+            Id = Guid.NewGuid();
+            _game = game;
+            _board = board;
+        }
+
+        public void SetGame(Game game)
+        {
+            _game = game;
+        }
+
+        public void SendNetGameStatus()
+        {
+            if (Started && Enemy != null)
+            {
+                var item = _game.Log[_game.Log.Count - 1];
+                var step = string.Format("{0}", _game.Direction ? item.White : item.Black);
+                SendMessage(Enemy, new P2PData(_game.Direction ? Player.Black : Player.White, Id,
+                    step, _game.BlackScore, _game.WhiteScore)
+                { Map = _board.ToString() });
+            }
         }
 
         public Task RefreshPeersAsync()
@@ -37,7 +76,7 @@ namespace Checkers.Net
             return task;
         }
 
-        private void RefreshPeers()
+        public void RefreshPeers()
         {
             // Создание распознавателя и добавление обработчиков событий
             PeerNameResolver resolver = new PeerNameResolver();
@@ -56,35 +95,13 @@ namespace Checkers.Net
 
         public event Action ResolveCompleted = delegate { };
 
-        private void OnResolveCompleted()
+        void resolver_ResolveCompleted(object sender, ResolveCompletedEventArgs e)
         {
+            CanRefreshPeers = true;
             ResolveCompleted();
         }
 
-        void resolver_ResolveCompleted(object sender, ResolveCompletedEventArgs e)
-        {
-            // Сообщение об ошибке, если в облаке не найдены пиры
-            if (PeerList.Count == 0)
-            {
-                PeerList.Add(
-                   new PeerEntry
-                   {
-                       DisplayString = "Пиры не найдены.",
-                       State = PeerState.NotFound,
-                       Player = Player.White
-                   });
-            }
-            // Повторно включаем кнопку "обновить"
-            CanRefreshPeers = true;
-            OnResolveCompleted();
-        }
-
         public event Action ResolveProgressChanged = delegate { };
-
-        private void OnResolveProgressChanged()
-        {
-            ResolveProgressChanged();
-        }
 
         void resolver_ResolveProgressChanged(object sender, ResolveProgressChangedEventArgs e)
         {
@@ -108,27 +125,35 @@ namespace Checkers.Net
                                ServiceProxy = serviceProxy,
                                DisplayString = serviceProxy.GetName(),
                                State = PeerState.User,
-                               Player = serviceProxy.GetPlayer()
+                               Player = serviceProxy.GetPlayer(),
+                               PlayerId = serviceProxy.GetPlayerId()
                            });
-                        OnResolveProgressChanged();
+                        ResolveProgressChanged();
                     }
                     catch (EndpointNotFoundException)
                     {
-                        PeerList.Add(
-                           new PeerEntry
-                           {
-                               PeerName = peer.PeerName,
-                               DisplayString = "Неизвестный пир",
-                               State = PeerState.Unknown,
-                               Player = Player.White
-                           });
-                        OnResolveProgressChanged();
                     }
                 }
             }
         }
 
-        public void SendMessasge(PeerEntry peerEntry, P2PData message)
+        public void SendConnect(PeerEntry peerEntry)
+        {
+            // Получение пира и прокси, для отправки сообщения
+            if (peerEntry != null && peerEntry.ServiceProxy != null)
+            {
+                try
+                {
+                    peerEntry.ServiceProxy.SendConnect(Id, Properties.Settings.Default.P2PUserName);
+                }
+                catch (CommunicationException)
+                {
+
+                }
+            }
+        }
+
+        public void SendMessage(PeerEntry peerEntry, P2PData message)
         {
             // Получение пира и прокси, для отправки сообщения
             if (peerEntry != null && peerEntry.ServiceProxy != null)
@@ -146,15 +171,44 @@ namespace Checkers.Net
 
         public event Action<P2PData, string> DisplayPeerMessage = delegate { };
 
-        private void OnDisplayPeerMessage(P2PData message, string from)
+        public void DisplayMessage(P2PData message, string from)
         {
             DisplayPeerMessage(message, from);
         }
 
-        public void DisplayMessage(P2PData message, string from)
+        public void DisplayConnect(Guid id, string from)
         {
-            OnDisplayPeerMessage(message, from);
+            if (Started && Enemy == null)
+            {
+                ResolveCompleted += _net_ResolveCompleted;
+                _connectId = id;
+                _connCount = 10;
+                RefreshPeersAsync();
+            }
         }
+
+        private Guid _connectId;
+        private int _connCount;
+
+        private void _net_ResolveCompleted()
+        {
+            foreach (var peer in PeerList)
+            {
+                if (peer.PlayerId == _connectId)
+                {
+                    Enemy = peer;
+                    ResolveCompleted -= _net_ResolveCompleted;
+                    _game.WinPlayer = WinPlayer.Game;
+                    CaptionChanged();
+                    return;
+                }
+            }
+            _connCount--;
+            if (_connCount <= 0) return;
+            RefreshPeersAsync();
+        }
+
+        public event Action CaptionChanged = delegate { };
 
         private bool Start(string port, string username, Player player, string machineName)
         {
@@ -188,7 +242,7 @@ namespace Checkers.Net
             }
 
             // Регистрация и запуск службы WCF
-            localService = new P2PService(this, username, player);
+            localService = new P2PService(this, username, player, Id);
 
             host = new ServiceHost(localService, new Uri(serviceUrl));
             NetTcpBinding binding = new NetTcpBinding();
@@ -253,6 +307,16 @@ namespace Checkers.Net
             return task;
         }
 
+        public Task RestartAsync(string port, string username, Player player, string machineName)
+        {
+            var task = new Task(() => 
+            {
+                Stop();
+                Start(port, username, player, machineName);
+            });
+            task.Start();
+            return task;
 
+        }
     }
 }

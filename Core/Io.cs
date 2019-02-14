@@ -261,12 +261,13 @@ namespace Checkers
         /// <param name="location">Позиция курсора</param>
         public void MouseMove(Point location)
         {
+            if (_game.WinPlayer != WinPlayer.Game) return;
             var address = GetCellAddress(location);
             Cell cell;
             // если под курсором найдена разрешённая ячейка
             if (GetCell(location, out cell) && cell.State != State.Prohibited)
             {
-                if (_board.Mode == PlayMode.Game || _board.Mode == PlayMode.NetGame)
+                if (_game.Mode == PlayMode.Game || _game.Mode == PlayMode.NetGame)
                 {
                     if (_game.Player == Player.Black && !_game.Direction ||
                     _game.Player == Player.White && _game.Direction) return;

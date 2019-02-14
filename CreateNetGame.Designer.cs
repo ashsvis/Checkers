@@ -107,8 +107,11 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "CreateNetGame";
+            this.ShowIcon = false;
+            this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Создание сетевой игры";
+            this.Load += new System.EventHandler(this.CreateNetGame_Load);
             this.grSideSelect.ResumeLayout(false);
             this.grSideSelect.PerformLayout();
             this.ResumeLayout(false);

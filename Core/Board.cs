@@ -14,14 +14,6 @@ namespace Checkers
         SuccessfullCombat           // разрешённое взятие шашки противника
     }
 
-    public enum PlayMode
-    {
-        Game,       // игра с компьютером
-        NetGame,    // игра по сети
-        SelfGame,   // игра с самим собой
-        Collocation // расстановка фишек
-    }
-
     public enum GoalDirection
     {
         NW,
@@ -41,9 +33,6 @@ namespace Checkers
         private readonly Hashtable _fields = new Hashtable();
         private Hashtable _cells = new Hashtable();
         private Cell _selected;
-        private PlayMode _mode;
-        private object _lastGameMap = null;
-        private object _lastCollocationMap = null;
 
         private int _movedCount = 0;
         List<Cell> _steps = new List<Cell>();
@@ -55,6 +44,10 @@ namespace Checkers
             _game = game;
         }
 
+        /// <summary>
+        /// Привязка объекта game к доске
+        /// </summary>
+        /// <param name="game"></param>
         public void SetGame(Game game)
         {
             _game = game;
@@ -66,34 +59,9 @@ namespace Checkers
 
         public int SideSize { get { return _boardSize; } }
 
-        public PlayMode Mode
-        {
-            get { return _mode; }
-            set
-            {
-                if (_mode != value)
-                {
-                    // сохраняем текущую расстановку
-                    if (_mode == PlayMode.Game)
-                        _lastGameMap = _cells.DeepClone();
-                    else if (_mode == PlayMode.Collocation)
-                        _lastCollocationMap = _cells.DeepClone();
-                    _mode = value;
-                    // восстанавливаем расстановка
-                    if (_mode == PlayMode.Game && _lastGameMap != null)
-                    {
-                        var map = _lastGameMap.DeepClone();
-                        SetMap(map);
-                    }
-                    else if (_mode == PlayMode.Collocation && _lastCollocationMap != null)
-                    {
-                        var map = _lastCollocationMap.DeepClone();
-                        SetMap(map);
-                    }
-                }
-            }
-        }
-
+        /// <summary>
+        /// Построение доски вначале
+        /// </summary>
         public void ResetMap()
         {
             var whiteCheckers = "a1,c1,e1,g1,b2,d2,f2,h2,a3,c3,e3,g3";
@@ -124,6 +92,10 @@ namespace Checkers
             }
         }
 
+        /// <summary>
+        /// Положение фишек на доске в текстовую строку
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             var list = new List<string>();
@@ -143,6 +115,10 @@ namespace Checkers
             return string.Join(",", list);
         }
 
+        /// <summary>
+        /// Установка фишек на доску из текстовой строки
+        /// </summary>
+        /// <param name="text"></param>
         public void SetMap(string text)
         {
             // очистка доски
@@ -184,16 +160,27 @@ namespace Checkers
             return _cells;
         }
 
+        /// <summary>
+        /// Установка фишек на доску из хеш-таблицы
+        /// </summary>
+        /// <param name="value"></param>
         public void SetMap(object value)
         {
             _cells = (Hashtable)value; 
         }
 
+        /// <summary>
+        /// Получить таблицу полей доски
+        /// </summary>
+        /// <returns></returns>
         public Hashtable GetFields()
         {
             return _fields;
         }
 
+        /// <summary>
+        /// Текущая ячейка
+        /// </summary>
         public Cell Selected
         {
             get { return _selected; }
@@ -388,7 +375,7 @@ namespace Checkers
             cell = null;
             if (address.IsEmpty()) return false;
             cell = (Cell)_cells[address];
-            return true;
+            return cell != null;
         }
 
         /// <summary>
@@ -436,10 +423,11 @@ namespace Checkers
         /// <param name="location"></param>
         public void SelectSourceCell(Address location)
         {
+            if (_game.WinPlayer != WinPlayer.Game) return;
             Cell cell;
             if (GetCell(location, out cell) && cell.State != State.Prohibited)
             {
-                if (Mode == PlayMode.Game || Mode == PlayMode.NetGame)
+                if (_game.Mode == PlayMode.Game || _game.Mode == PlayMode.NetGame)
                 {
                     if (_game.Player == Player.Black && !_game.Direction ||
                         _game.Player == Player.White && _game.Direction) return;
@@ -454,12 +442,17 @@ namespace Checkers
             }
         }
 
+        /// <summary>
+        /// Выбор целевой ячейки для хода или боя
+        /// </summary>
+        /// <param name="location"></param>
         public void SelectTargetCell(Address location)
         {
+            if (_game.WinPlayer != WinPlayer.Game) return;
             Cell cell;
             if (GetCell(location, out cell) && cell.State != State.Prohibited)
             {
-                if (Mode == PlayMode.Game || Mode == PlayMode.NetGame)
+                if (_game.Mode == PlayMode.Game || _game.Mode == PlayMode.NetGame)
                 {
                     if (_game.Player == Player.Black && !_game.Direction ||
                    _game.Player == Player.White && _game.Direction) return;

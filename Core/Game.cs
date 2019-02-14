@@ -11,10 +11,19 @@ namespace Checkers
 
     public enum WinPlayer
     {
-        None,
-        White,
-        Black,
-        Draw
+        None,   // игра не начата
+        Game,   // игра идёт
+        White,  // белые выиграли
+        Black,  // чёрные выиграли
+        Draw    // ничья
+    }
+
+    public enum PlayMode
+    {
+        Game,       // игра с компьютером
+        NetGame,    // игра по сети
+        SelfGame,   // игра с самим собой
+        Collocation // расстановка фишек
     }
 
     [Serializable]
@@ -31,6 +40,8 @@ namespace Checkers
 
         public WinPlayer WinPlayer { get; set; }
 
+        public PlayMode Mode { get; set; }
+
         public Game()
         {
             Log = new List<LogItem>();
@@ -40,7 +51,27 @@ namespace Checkers
         {
             WinPlayer = WhiteScore == 12
                 ? WinPlayer.White
-                : BlackScore == 12 ? WinPlayer.Black : WinPlayer.None;
+                : BlackScore == 12 
+                     ? WinPlayer.Black 
+                     : WinPlayer.Game;
+        }
+
+        public override string ToString()
+        {
+            switch (WinPlayer)
+            {
+                case WinPlayer.None:
+                    return "Выберите тип игры...";
+                case WinPlayer.Game:
+                    return Direction ? "Ход чёрных..." : "Ход белых...";
+                case WinPlayer.White:
+                    return "Белые выиграли";
+                case WinPlayer.Black:
+                    return "Чёрные выиграли";
+                case WinPlayer.Draw:
+                    return "Ничья";
+            }
+            return base.ToString();
         }
     }
 }

@@ -6,15 +6,15 @@
       <Compartment Name="Fields" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>wBgAgAAIgIAEIIIFggSEBiEAAAQQggEIRAAAAEIAgAc=</HashCode>
-      <FileName>Board.cs</FileName>
+      <HashCode>wBgAoAAEgIAEAAIFgASEBiEAAAAQigMAxAAAAVIAAAc=</HashCode>
+      <FileName>Core\Board.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Checkers.Cell">
     <Position X="4.5" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAgAAAAAAAAAAAAAAAAAAACAAAABAAAAAA=</HashCode>
-      <FileName>Cell.cs</FileName>
+      <FileName>Core\Cell.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Checkers.CheckersForm">
@@ -23,15 +23,15 @@
       <Compartment Name="Fields" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>UB5iEBgGCWQQgFCqECDCgQBDlASAFFigCQBEFFEBAiY=</HashCode>
+      <HashCode>UB5iEBkEAWQYwFCiECjOgABDkCyIFFqoHSgAFFABgiY=</HashCode>
       <FileName>CheckersForm.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Checkers.Game">
     <Position X="6.25" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAACAAIAAAAAgAAAAAAAAAAQAAACA=</HashCode>
-      <FileName>Game.cs</FileName>
+      <HashCode>AAAAAAAAAIAAABAAACAAIAAAAAgAAAAAAAAAAQAQACA=</HashCode>
+      <FileName>Core\Game.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Checkers.Io">
@@ -41,21 +41,21 @@
     </Compartments>
     <TypeIdentifier>
       <HashCode>ygAAABAACAAAAEAAEACAAEAAAGJAEAIHAoAACACAAAQ=</HashCode>
-      <FileName>Io.cs</FileName>
+      <FileName>Core\Io.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Checkers.LogItem">
-    <Position X="4.5" Y="2.25" Width="1.5" />
+    <Position X="4.5" Y="2.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAEAAAAABAAAAAEAEAAAAAABAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>LogItem.cs</FileName>
+      <HashCode>AAAEAAAAAAAAAAgEAEAAAAAABAAAAAAAgEAABAAAAAA=</HashCode>
+      <FileName>Core\LogItem.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Checkers.ObjectCloner">
-    <Position X="4.5" Y="6" Width="1.5" />
+    <Position X="4.5" Y="8" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>ObjectCloner.cs</FileName>
+      <FileName>Core\ObjectCloner.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Checkers.Program" Collapsed="true">
@@ -66,10 +66,10 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Checkers.SaverLoader">
-    <Position X="4.5" Y="4.5" Width="1.5" />
+    <Position X="4.5" Y="6.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAA=</HashCode>
-      <FileName>SaverLoader.cs</FileName>
+      <FileName>Core\SaverLoader.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Checkers.Properties.Resources" Collapsed="true">
@@ -81,49 +81,57 @@
   <Class Name="Checkers.Properties.Settings" Collapsed="true">
     <Position X="11.25" Y="1.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAIAAAAAABAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAQAIAACAAABAAAAAAAAAAAAAAA=</HashCode>
     </TypeIdentifier>
+  </Class>
+  <Class Name="Checkers.Net.NetGame">
+    <Position X="13" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>ABASlgAAACAAAAADECiAoAIAgAIFAAAQKQg0AAACAAQ=</HashCode>
+      <FileName>Net\NetGame.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
   </Class>
   <Struct Name="Checkers.Address">
     <Position X="2.75" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AABAAAAAQAAAAAAEAABAAAAAAAAAAgAAQAAAAAAAAAA=</HashCode>
-      <FileName>Address.cs</FileName>
+      <FileName>Core\Address.cs</FileName>
     </TypeIdentifier>
   </Struct>
   <Enum Name="Checkers.MoveResult">
-    <Position X="11.25" Y="5.5" Width="1.5" />
+    <Position X="11.25" Y="6.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAQAAAAAAAAABAAAAAAAAAAAAAAAAEAAAAAAAAA=</HashCode>
-      <FileName>Board.cs</FileName>
+      <FileName>Core\Board.cs</FileName>
     </TypeIdentifier>
   </Enum>
   <Enum Name="Checkers.PlayMode">
     <Position X="11.25" Y="3" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAIAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Board.cs</FileName>
+      <HashCode>AAAAAAAAAIAAAAAAAAAAAgAABAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Core\Board.cs</FileName>
     </TypeIdentifier>
   </Enum>
   <Enum Name="Checkers.GoalDirection">
-    <Position X="6.25" Y="3" Width="1.5" />
+    <Position X="6.25" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAACEAAAAAAAAAAAQgAAAAAAAAAAhCIAAA=</HashCode>
-      <FileName>Board.cs</FileName>
+      <FileName>Core\Board.cs</FileName>
     </TypeIdentifier>
   </Enum>
   <Enum Name="Checkers.State">
     <Position X="6.25" Y="5.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAEAAAAAAAAAAAABAIAAAAABAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Cell.cs</FileName>
+      <FileName>Core\Cell.cs</FileName>
     </TypeIdentifier>
   </Enum>
   <Enum Name="Checkers.Player">
-    <Position X="11.25" Y="4.25" Width="1.5" />
+    <Position X="11.25" Y="4.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Game.cs</FileName>
+      <FileName>Core\Game.cs</FileName>
     </TypeIdentifier>
   </Enum>
   <Font Name="Segoe UI" Size="9" />

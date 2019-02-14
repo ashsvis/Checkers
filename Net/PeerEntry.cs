@@ -1,4 +1,5 @@
-﻿using System.Net.PeerToPeer;
+﻿using System;
+using System.Net.PeerToPeer;
 
 namespace Checkers.Net
 {
@@ -16,6 +17,7 @@ namespace Checkers.Net
         public string DisplayString { get; set; }
         public Player Player { get; set; }
         public PeerState State { get; set; }
+        public Guid PlayerId { get; set; }
 
         public override string ToString()
         {

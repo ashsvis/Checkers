@@ -104,16 +104,5 @@ namespace Checkers
             btnSelect.Enabled = _net.Started && Selected != null && Selected.State == PeerState.User;
         }
 
-        private void btnCreateNetGame_Click(object sender, EventArgs e)
-        {
-            var frm = new CreateNetGame(this, _game);
-            if (frm.ShowDialog(this) == DialogResult.OK)
-            {
-                _game.Player = frm.GetPlayer();
-                _form.Invalidate();
-                DialogResult = DialogResult.Yes;
-                Close();
-            }
-        }
     }
 }

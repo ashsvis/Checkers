@@ -33,7 +33,6 @@
             this.btnRefreshPeers = new System.Windows.Forms.Button();
             this.btnSelect = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
-            this.btnCreateNetGame = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -92,17 +91,6 @@
             this.btnCancel.Text = "Отмена";
             this.btnCancel.UseVisualStyleBackColor = true;
             // 
-            // btnCreateNetGame
-            // 
-            this.btnCreateNetGame.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnCreateNetGame.Location = new System.Drawing.Point(96, 194);
-            this.btnCreateNetGame.Name = "btnCreateNetGame";
-            this.btnCreateNetGame.Size = new System.Drawing.Size(75, 24);
-            this.btnCreateNetGame.TabIndex = 3;
-            this.btnCreateNetGame.Text = "Создать...";
-            this.btnCreateNetGame.UseVisualStyleBackColor = true;
-            this.btnCreateNetGame.Click += new System.EventHandler(this.btnCreateNetGame_Click);
-            // 
             // SelectNetEnemy
             // 
             this.AcceptButton = this.btnSelect;
@@ -112,7 +100,6 @@
             this.ClientSize = new System.Drawing.Size(353, 232);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnSelect);
-            this.Controls.Add(this.btnCreateNetGame);
             this.Controls.Add(this.btnRefreshPeers);
             this.Controls.Add(this.lbPeerList);
             this.Controls.Add(this.label1);
@@ -121,8 +108,10 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "SelectNetEnemy";
+            this.ShowIcon = false;
+            this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Выбор цвета и противника";
+            this.Text = "Выбор противника по сети";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SelectNetEnemy_FormClosing);
             this.Load += new System.EventHandler(this.SelectNetEnemy_Load);
             this.ResumeLayout(false);
@@ -137,6 +126,5 @@
         private System.Windows.Forms.Button btnRefreshPeers;
         private System.Windows.Forms.Button btnSelect;
         private System.Windows.Forms.Button btnCancel;
-        private System.Windows.Forms.Button btnCreateNetGame;
     }
 }
